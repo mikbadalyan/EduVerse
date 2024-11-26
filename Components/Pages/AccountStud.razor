@@ -1,0 +1,188 @@
+﻿@page "/acc"
+@using EduVerse.Components.Layout
+@using EduVerse.Data
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext DbContext
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@layout AccountLayout
+
+<h3>AccountStud</h3>
+
+<div class="date-boxes" id="date-boxes">
+    @foreach (var date in dates)
+    {
+        var entities = newEntities.Where(e => e.Date.Date == date.Date).ToList();
+        <div class="date-box" id="date-@date.ToString("yyyyMMdd")">
+            <div class="clickable-boxes">
+                @foreach (var entity in entities)
+                {
+                    <div class="clickable-box" style="background-color:@(entity.Color);" @onclick="() => ShowDetails(entity)">
+                        <p>Name: @entity.Name</p>
+                        <p>Topic: @entity.Topic</p>
+                        <p>Lesson: @entity.Lesson</p>
+                        <p>Coin: @entity.Coin</p>
+                        <p>Lesson Type: @entity.LessonType</p>
+                    </div>
+                }
+            </div>
+            <div class="date-footer">@date.ToShortDateString()</div>
+        </div>
+    }
+</div>
+
+@if (selectedEntity != null)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Details</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDetails"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Name:</strong> @selectedEntity.Name</p>
+                    <p><strong>Topic:</strong> @selectedEntity.Topic</p>
+                    <p><strong>Lesson:</strong> @selectedEntity.Lesson</p>
+                    <p><strong>Coin:</strong> @selectedEntity.Coin</p>
+                    <p><strong>Lesson Type:</strong> @selectedEntity.LessonType</p>
+                    <p><strong>Date:</strong> @selectedEntity.Date.ToShortDateString()</p>
+                    <p><strong>Status:</strong> @selectedEntity.Status</p>
+                    <div>
+                        <button class="btn btn-secondary" @onclick="@(async () => await UpdateStatus("Not Done"))">Not Done</button>
+                        <button class="btn btn-secondary" @onclick="@(async () => await UpdateStatus("In Progress"))">In Progress</button>
+                        <button class="btn btn-secondary" @onclick="@(async () => await UpdateStatus("Done"))">Done</button>
+                        <button class="btn btn-secondary" @onclick="@(async () => await UpdateStatus("I Have Difficulty"))">I Have Difficulty</button>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Pinned Resources</h6>
+                        <ul>
+                            <li><a href="#">Lorem ipsum link 1</a></li>
+                            <li><a href="#">Lorem ipsum link 2</a></li>
+                            <li><a href="#">Lorem ipsum link 3</a></li>
+                        </ul>
+                        <button class="btn btn-link">Show More Resources</button>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Tasks</h6>
+                        <ul>
+                            <li>Task 1: Lorem ipsum</li>
+                            <li>Task 2: Lorem ipsum</li>
+                            <li>Task 3: Lorem ipsum</li>
+                        </ul>
+                        <button class="btn btn-link">Show More Tasks</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDetails">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<NewEntity> newEntities = new();
+    private List<DateTime> dates = new()
+    {
+        new DateTime(2024, 11, 25),
+        new DateTime(2024, 11, 26),
+        new DateTime(2024, 11, 27),
+        new DateTime(2024, 11, 28),
+        new DateTime(2024, 11, 29),
+        new DateTime(2024, 11, 30)
+    };
+
+    private NewEntity? selectedEntity; // Make selectedEntity nullable
+    private bool isFirstRender = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var userId = await JSRuntime.InvokeAsync<string>("prompt", "Please enter your User ID:");
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                Navigation.NavigateTo("/");
+                return;
+            }
+
+            await RegisterUser(userId);
+
+            newEntities = await DbContext.NewEntities.Where(e => e.UserId == userId).ToListAsync();
+
+            var currentDate = DateTime.Now.Date;
+            var currentBoxId = $"date-{currentDate:yyyyMMdd}";
+            await JSRuntime.InvokeVoidAsync("scrollToElement", currentBoxId);
+
+            isFirstRender = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ShowDetails(NewEntity entity)
+    {
+        selectedEntity = entity;
+    }
+
+    private void CloseDetails()
+    {
+        selectedEntity = null;
+    }
+
+    private async Task UpdateStatus(string status)
+    {
+        if (selectedEntity != null)
+        {
+            selectedEntity.Status = status;
+            selectedEntity.Color = status switch
+            {
+                "Done" => "green",
+                "Locked" => "grey",
+                _ => selectedEntity.Color
+            };
+
+            if (status == "Done")
+            {
+                var user = await DbContext.Users.FirstOrDefaultAsync(u => u.UserId == selectedEntity.UserId);
+                if (user != null)
+                {
+                    user.Coin += selectedEntity.Coin;
+                    DbContext.Users.Update(user);
+                }
+            }
+
+            await DbContext.SaveChangesAsync();
+        }
+    }
+
+    private async Task RegisterUser(string userId)
+    {
+        var userExists = await DbContext.Users.AnyAsync(u => u.UserId == userId);
+        if (!userExists)
+        {
+            // Register the new user
+            DbContext.Users.Add(new User { UserId = userId });
+
+            // Add default subjects for the new user
+            var defaultSubjects = await DbContext.DefaultSubjects.ToListAsync();
+            var newEntities = defaultSubjects.Select(ds => new NewEntity
+                {
+                    Name = ds.Name,
+                    Topic = ds.Topic,
+                    Lesson = ds.Lesson,
+                    Coin = ds.Coin,
+                    LessonType = ds.LessonType,
+                    Date = DateTime.Now,
+                    PathName = ds.PathName,
+                    Status = ds.Status,
+                    Color = ds.Color,
+                    UserId = userId
+                }).ToList();
+
+            DbContext.NewEntities.AddRange(newEntities);
+            await DbContext.SaveChangesAsync();
+        }
+    }
+}
