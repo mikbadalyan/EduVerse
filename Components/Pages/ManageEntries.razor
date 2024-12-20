@@ -1,0 +1,163 @@
+﻿@page "/manage-entries"
+@using EduVerse.Data
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext DbContext
+@rendermode InteractiveServer
+
+<h3>Text Entry Form</h3>
+
+<EditForm Model="@textEntry" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="name">Name:</label>
+        <InputText id="name" @bind-Value="textEntry.Name" class="form-control" />
+    </div>
+    <div>
+        <label for="topic">Topic:</label>
+        <InputText id="topic" @bind-Value="textEntry.Topic" class="form-control" />
+    </div>
+    <div>
+        <label for="lesson">Lesson:</label>
+        <InputNumber id="lesson" @bind-Value="textEntry.Lesson" class="form-control" />
+    </div>
+    <div>
+        <label for="rewardCoin">Reward Coin:</label>
+        <InputNumber id="rewardCoin" @bind-Value="textEntry.Reward_coin" class="form-control" />
+    </div>
+    <div>
+        <label for="lessonType">Lesson Type:</label>
+        <InputText id="lessonType" @bind-Value="textEntry.Lesson_type" class="form-control" />
+    </div>
+    <div>
+        <label for="pathname">Pathname:</label>
+        <InputText id="pathname" @bind-Value="textEntry.Pathname" class="form-control" />
+    </div>
+    <div>
+        <label for="color">Color:</label>
+        <InputText id="color" @bind-Value="textEntry.Color" class="form-control" />
+    </div>
+    <div>
+        <label for="resourcesLink">Resources Link:</label>
+        <InputText id="resourcesLink" @bind-Value="textEntry.Resources_link" class="form-control" />
+    </div>
+    <div>
+        <label for="pdf">PDF:</label>
+        <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
+    </div>
+    <div>
+        <label for="tasks">Tasks:</label>
+        <InputText id="tasks" @bind-Value="textEntry.Tasks" class="form-control" />
+    </div>
+    <div>
+        <label for="level">Level:</label>
+        <InputText id="level" @bind-Value="textEntry.Level" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(pdfBase64))
+{
+    <h3>PDF Preview</h3>
+    <iframe src="data:application/pdf;base64,@pdfBase64" width="600" height="400"></iframe>
+}
+
+<h3>Text Entries</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Topic</th>
+            <th>Lesson</th>
+            <th>Reward Coin</th>
+            <th>Lesson Type</th>
+            <th>Pathname</th>
+            <th>Color</th>
+            <th>Resources Link</th>
+            <th>Tasks</th>
+            <th>Level</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in textEntries)
+        {
+            <tr>
+                <td>@entry.Name</td>
+                <td>@entry.Topic</td>
+                <td>@entry.Lesson</td>
+                <td>@entry.Reward_coin</td>
+                <td>@entry.Lesson_type</td>
+                <td>@entry.Pathname</td>
+                <td>@entry.Color</td>
+                <td>@entry.Resources_link</td>
+                <td>@entry.Tasks</td>
+                <td>@entry.Level</td>
+                <td>
+                    <button class="btn btn-warning" @onclick="() => EditEntry(entry)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteEntry(entry)">Delete</button>
+                    <button class="btn btn-info" @onclick="() => ViewPDF(entry)">View PDF</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private TextEntry textEntry = new TextEntry();
+    private List<TextEntry> textEntries = new List<TextEntry>();
+    private string pdfBase64;
+
+    protected override async Task OnInitializedAsync()
+    {
+        textEntries = await DbContext.TextEntries.ToListAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (textEntry.Id == 0)
+        {
+            DbContext.TextEntries.Add(textEntry);
+        }
+        else
+        {
+            DbContext.TextEntries.Update(textEntry);
+        }
+        await DbContext.SaveChangesAsync();
+        textEntries = await DbContext.TextEntries.ToListAsync();
+        textEntry = new TextEntry();
+        pdfBase64 = null;
+    }
+
+    private void EditEntry(TextEntry entry)
+    {
+        textEntry = entry;
+    }
+
+    private async Task DeleteEntry(TextEntry entry)
+    {
+        DbContext.TextEntries.Remove(entry);
+        await DbContext.SaveChangesAsync();
+        textEntries = await DbContext.TextEntries.ToListAsync();
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            textEntry.PDF = stream.ToArray();
+        }
+    }
+
+    private void ViewPDF(TextEntry entry)
+    {
+        if (entry.PDF != null)
+        {
+            pdfBase64 = Convert.ToBase64String(entry.PDF);
+        }
+    }
+}

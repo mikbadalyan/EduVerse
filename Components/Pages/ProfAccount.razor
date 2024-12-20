@@ -1,0 +1,84 @@
+﻿@page "/prof"
+@using EduVerse.Data
+@inject AppDbContext DbContext
+@rendermode InteractiveServer
+
+<h3>Text Entry Form</h3>
+
+<p>
+    <a href="/manage-entries" class="btn btn-primary">Manage Text Entries</a>
+</p>
+
+<EditForm Model="@textEntry" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="name">Name:</label>
+        <InputText id="name" @bind-Value="textEntry.Name" class="form-control" />
+    </div>
+    <div>
+        <label for="topic">Topic:</label>
+        <InputText id="topic" @bind-Value="textEntry.Topic" class="form-control" />
+    </div>
+    <div>
+        <label for="lesson">Lesson:</label>
+        <InputNumber id="lesson" @bind-Value="textEntry.Lesson" class="form-control" />
+    </div>
+    <div>
+        <label for="rewardCoin">Reward Coin:</label>
+        <InputNumber id="rewardCoin" @bind-Value="textEntry.Reward_coin" class="form-control" />
+    </div>
+    <div>
+        <label for="lessonType">Lesson Type:</label>
+        <InputText id="lessonType" @bind-Value="textEntry.Lesson_type" class="form-control" />
+    </div>
+    <div>
+        <label for="pathname">Pathname:</label>
+        <InputText id="pathname" @bind-Value="textEntry.Pathname" class="form-control" />
+    </div>
+    <div>
+        <label for="color">Color:</label>
+        <InputText id="color" @bind-Value="textEntry.Color" class="form-control" />
+    </div>
+    <div>
+        <label for="resourcesLink">Resources Link:</label>
+        <InputText id="resourcesLink" @bind-Value="textEntry.Resources_link" class="form-control" />
+    </div>
+    <div>
+        <label for="pdf">PDF:</label>
+        <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
+    </div>
+    <div>
+        <label for="tasks">Tasks:</label>
+        <InputText id="tasks" @bind-Value="textEntry.Tasks" class="form-control" />
+    </div>
+    <div>
+        <label for="level">Level:</label>
+        <InputText id="level" @bind-Value="textEntry.Level" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    private TextEntry textEntry = new TextEntry();
+
+    private async Task HandleValidSubmit()
+    {
+        DbContext.TextEntries.Add(textEntry);
+        await DbContext.SaveChangesAsync();
+        // Reset the form
+        textEntry = new TextEntry();
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            textEntry.PDF = stream.ToArray();
+        }
+    }
+}

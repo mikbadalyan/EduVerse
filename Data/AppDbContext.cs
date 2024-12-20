@@ -14,7 +14,7 @@ namespace EduVerse.Data
         public DbSet<User> Users { get; set; } // DbSet for Users
         public DbSet<DefaultSubject> DefaultSubjects { get; set; } // DbSet for DefaultSubjects
         public DbSet<Dependency> Dependencies { get; set; } // DbSet for Dependencies
-
+        public DbSet<TextEntry> TextEntries { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -89,5 +89,21 @@ namespace EduVerse.Data
     {
         public string FullName { get; set; }
         public bool EmailConfirmed { get; set; }
+    }
+
+    public class TextEntry
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Topic { get; set; }
+        public int Lesson { get; set; }
+        public int Reward_coin { get; set; }
+        public string Lesson_type { get; set; }
+        public string Pathname { get; set; }
+        public string Color { get; set; }
+        public string Resources_link { get; set; }
+        public byte[] PDF { get; set; }
+        public string Tasks { get; set; }
+        public string Level { get; set; }
     }
 }
