@@ -18,7 +18,7 @@
             <div class="clickable-boxes">
                 @foreach (var entity in entities)
                 {
-                    <div class="clickable-box" style="background-color:@(entity.Color);" @onclick="() => ShowDetails(entity)">
+                    <div class="clickable-box @(entity.Status == "Locked" ? "locked" : "")" style="background-color:@(entity.Color);" @onclick="@(entity.Status == "Locked" ? null : () => ShowDetails(entity))">
                         <p>Name: @entity.Name</p>
                         <p>Topic: @entity.Topic</p>
                         <p>Lesson: @entity.Lesson</p>
@@ -86,12 +86,12 @@
     private List<NewEntity> newEntities = new();
     private List<DateTime> dates = new()
     {
-        new DateTime(2024, 11, 25),
         new DateTime(2024, 11, 26),
         new DateTime(2024, 11, 27),
         new DateTime(2024, 11, 28),
         new DateTime(2024, 11, 29),
-        new DateTime(2024, 11, 30)
+        new DateTime(2024, 11, 30),
+        new DateTime(2024, 12, 14)
     };
 
     private NewEntity? selectedEntity; // Make selectedEntity nullable
@@ -112,6 +112,12 @@
 
             newEntities = await DbContext.NewEntities.Where(e => e.UserId == userId).ToListAsync();
 
+            // Ensure SubjectId matches DefaultSubject Ids
+            await UpdateSubjectIds();
+
+            // Unlock subjects based on dependencies
+            await UnlockSubjectsBasedOnDependencies();
+
             var currentDate = DateTime.Now.Date;
             var currentBoxId = $"date-{currentDate:yyyyMMdd}";
             await JSRuntime.InvokeVoidAsync("scrollToElement", currentBoxId);
@@ -119,6 +125,21 @@
             isFirstRender = false;
             StateHasChanged();
         }
+    }
+
+    private async Task UpdateSubjectIds()
+    {
+        var defaultSubjects = await DbContext.DefaultSubjects.ToListAsync();
+        foreach (var entity in newEntities)
+        {
+            var defaultSubject = defaultSubjects.FirstOrDefault(ds => ds.Name == entity.Name && ds.Topic == entity.Topic);
+            if (defaultSubject != null)
+            {
+                entity.SubjectId = defaultSubject.Id;
+                DbContext.NewEntities.Update(entity);
+            }
+        }
+        await DbContext.SaveChangesAsync();
     }
 
     private void ShowDetails(NewEntity entity)
@@ -139,6 +160,8 @@
             selectedEntity.Color = status switch
             {
                 "Done" => "green",
+                "In Progress" => "yellow",
+                "I Have Difficulty" => "red",
                 "Locked" => "grey",
                 _ => selectedEntity.Color
             };
@@ -154,8 +177,42 @@
             }
 
             await DbContext.SaveChangesAsync();
+
+            // Re-check the unlocking logic
+            await UnlockSubjectsBasedOnDependencies();
         }
     }
+
+    private async Task UnlockSubjectsBasedOnDependencies()
+    {
+        var dependencies = await DbContext.Dependencies.ToListAsync();
+
+        foreach (var dependency in dependencies)
+        {
+            var subject = newEntities.FirstOrDefault(e => e.SubjectId == dependency.SubjectId);
+            if (subject != null && subject.Status == "locked")
+            {
+                var depend1 = dependency.Depend1.HasValue ? newEntities.FirstOrDefault(e => e.SubjectId == dependency.Depend1.Value) : null;
+                var depend2 = dependency.Depend2.HasValue ? newEntities.FirstOrDefault(e => e.SubjectId == dependency.Depend2.Value) : null;
+                var depend3 = dependency.Depend3.HasValue ? newEntities.FirstOrDefault(e => e.SubjectId == dependency.Depend3.Value) : null;
+                var depend4 = dependency.Depend4.HasValue ? newEntities.FirstOrDefault(e => e.SubjectId == dependency.Depend4.Value) : null;
+                var depend5 = dependency.Depend5.HasValue ? newEntities.FirstOrDefault(e => e.SubjectId == dependency.Depend5.Value) : null;
+
+                if ((depend1 == null || depend1.Status == "Done") &&
+                    (depend2 == null || depend2.Status == "Done") &&
+                    (depend3 == null || depend3.Status == "Done") &&
+                    (depend4 == null || depend4.Status == "Done") &&
+                    (depend5 == null || depend5.Status == "Done"))
+                {
+                    subject.Status = "Unlocked";
+                    DbContext.NewEntities.Update(subject);
+                }
+            }
+        }
+
+        await DbContext.SaveChangesAsync();
+    }
+
 
     private async Task RegisterUser(string userId)
     {

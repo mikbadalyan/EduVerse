@@ -1,23 +1,165 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime JS
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Layout/MainLayout.razor.js");
+            await module.InvokeVoidAsync("initializeScrollEffect");
+        }
+    }
+}
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="home-page">
+    <div class="div">
+        <div class="overlap">
+            <div class="text-wrapper">Solutions</div>
+            <div class="text-wrapper-2">Collaborating Universities and Institutions</div>
+            <div class="group">
+                <div class="overlap-group">
+                    <div class="rectangle"></div>
+                    <div class="text-wrapper-3">Learn More</div>
+                </div>
+                <div class="overlap-2">
+                    <div class="rectangle"></div>
+                    <div class="text-wrapper-3">Learn More</div>
+                </div>
+                <div class="overlap-3">
+                    <div class="rectangle"></div>
+                    <div class="text-wrapper-3">Learn More</div>
+                </div>
+            </div>
+            <p class="p">Custom educational pathways tailored to students’ academic progress and career goals.</p>
+            <p class="text-wrapper-4">Exchange ideas, resources, and expertise beyond institutional boundaries.</p>
+            <p class="text-wrapper-5">
+                Centralized platform for students to access certified professors’ materials and academic resources.
+            </p>
+            <img class="student-stress-bro" src="img/student-stress-bro-1.svg" />
+            <img class="students-pana" src="img/students-pana-1.svg" />
+            <img class="professor-pana" src="img/professor-pana-1.svg" />
+            <img class="vector" src="img/vector-3.svg" />
+            <div class="frame">
+                <img class="logo-RGB" src="img/logo-RGB-02-1.png" />
+                <img class="aualogo" src="img/aualogo-1.svg" />
+                <img class="ysu-logo-eng" src="img/ysu-logo-eng-1.png" />
+                <img class="unnamed" src="img/unnamed-1.png" />
+                <img class="img" src="img/rauhorizgoldengyaqnv9jxp9mxtxr1612184035-1.png" />
+            </div>
         </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+        <img class="group-2" src="img/group-106.png" />
+        <div class="overlap-4">
+            <div class="text-wrapper-6">Sign In</div>
+            <div class="text-wrapper-7">Solutions</div>
+            <div class="text-wrapper-8">News</div>
+            <div class="overlap-group-wrapper">
+                <div class="div-wrapper"><div class="text-wrapper-9">Home</div></div>
+            </div>
+            <img class="eduverse-high" src="img/eduverse-high-resolution-logo-transparent-2-cropped-3.svg" />
+            <div class="overlap-5">
+                <div class="rectangle"></div>
+                <img class="add-user" src="img/add-user-2.png" />
+                <div class="text-wrapper-10">Sign Up</div>
+            </div>
+        </div>
+        <img class="add-user-2" src="img/add-user-1.svg" />
+        <div class="text-wrapper-11">News</div>
+        <p class="your-pathway-to">YOUR PATHWAY TO KNOWLEDGE BEGINS HERE.</p>
+        <img class="eduverse-high-2" src="img/eduverse-high-resolution-logo-transparent-2-cropped-4.svg" />
+        <img class="vector-2" src="img/vector-4.svg" />
+        <img class="vector-3" src="img/vector-5.svg" />
+        <div class="overlap-6">
+            <div class="group-3">
+                <a href="https://apps.apple.com/" target="_blank" rel="noopener noreferrer">
+                    <img class="element-app" src="img/222-2228956_app-store-logo-app-store-icon-white-1.png" />
+                </a>
+                <img class="get-it-on-google" src="img/get-it-on-google-play-logo-1.png" />
+            </div>
+            <a href="facebook.com" target="_blank" rel="noopener noreferrer">
+                <img class="facebook-app-symbol" src="img/facebook-app-symbol-1.png" />
+            </a>
+            <a href="instagram.com" target="_blank" rel="noopener noreferrer">
+                <img class="instagram" src="img/instagram-1.png" />
+            </a>
+            <a href="https://x.com/?lang=en" target="_blank" rel="noopener noreferrer">
+                <img class="twitter" src="img/twitter-1.png" />
+            </a>
+            <a href="https://web.telegram.org/a/" target="_blank" rel="noopener noreferrer">
+                <img class="telegram" src="img/telegram-1.png" />
+            </a>
+        </div>
+        <img class="angle-circle-right" src="img/angle-circle-right-1.png" />
+        <img class="angle-circle-right-2" src="img/angle-circle-right-2.png" />
+        <div class="overlap-wrapper">
+            <div class="overlap-7">
+                <div class="element-wrapper"><img class="img-2" src="img/173157524393-1.png" /></div>
+                <p class="text-wrapper-12">Erasmus+ mobility scholarship: At Saarland University (Law)</p>
+                <p class="text-wrapper-13">
+                    The French University in Armenia announces a competition for the 2024-2025 academic year...
+                </p>
+                <div class="group-4">
+                    <div class="overlap-group-2"><div class="text-wrapper-14">Read more</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="group-5">
+            <div class="overlap-8">
+                <p class="text-wrapper-15">
+                    Ameriabank and VISA announce a contest for all students of public and private universities of Armenia
+                </p>
+                <p class="text-wrapper-16">
+                    Are you an ambitious, proactive and savvy student? Then join us, “My Armenia My Future” contest is just
+                    for you...
+                </p>
+                <img class="csr-banner-eng" src="img/csr-banner-1-eng-1.png" />
+                <div class="group-6">
+                    <div class="overlap-group-3"><div class="text-wrapper-14">Read more</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="overlap-9">
+            <div class="group-7">
+                <div class="overlap-10">
+                    <p class="text-wrapper-12">
+                        Erasmus+ Mobility Scholarship at Jean Moulin Lyon 3 University (Master&#39;s 1st Year)
+                    </p>
+                    <p class="text-wrapper-17">
+                        Details regarding admission requirements, criteria, application process, and timeline...
+                    </p>
+                    <div class="group-8">
+                        <div class="overlap-group-2"><div class="text-wrapper-14">Read more</div></div>
+                    </div>
+                </div>
+            </div>
+            <img class="img-2" src="img/photo-univlyon3-dfam-20150317175752-1.png" />
+        </div>
+        <div class="text-wrapper-18">General Information</div>
+        <div class="text-wrapper-19">Newsletter</div>
+        <div class="support-resources">Support &amp; Resources</div>
+        <div class="text-wrapper-20">FAQ</div>
+        <div class="text-wrapper-21">Help Center</div>
+        <div class="text-wrapper-22">Platform Updates</div>
+        <div class="text-wrapper-23">Privacy Policy</div>
+        <div class="text-wrapper-24">Accessibility</div>
+        <div class="text-wrapper-25">Terms of Use</div>
+        <div class="text-wrapper-26">News</div>
+        <div class="text-wrapper-27">AI Assistance</div>
+        <div class="overlap-11"><div class="text-wrapper-28">Email</div></div>
+        <div class="group-9">
+            <div class="overlap-12"><div class="text-wrapper-29">SUBSCRIBE</div></div>
+        </div>
+        <p class="text-wrapper-30">© Copyright 2024-2025 All Rights Reserved.</p>
+        <div class="group-10">
+            <div class="overlap-13">
+                <div class="rectangle-2"></div>
+                <div class="rectangle-3"></div>
+                <img class="robot" src="img/robot-1.png" />
+                <div class="ASK-ME">
+                    ASK<br />
+                    ME
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

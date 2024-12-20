@@ -1,0 +1,57 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@using EduVerseWeb.Models
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<Users> SignInManager
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<ul class="navbar-nav ms-auto">
+    @if (IsUserAuthenticated)
+
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" @onclick="HandleLogout">Logout</a>
+        </li>
+    }
+
+    else
+
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="/login">Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="/register">Register</a>
+        </li>
+    }
+</ul>
+
+@code {
+    private bool IsUserAuthenticated { get; set; }
+
+
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        IsUserAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+    }
+
+
+
+    private async Task HandleLogout()
+
+    {
+
+        await SignInManager.SignOutAsync();
+
+        Navigation.NavigateTo("/");
+
+    }
+}

@@ -65,6 +65,37 @@ namespace EduVerse.Migrations
                     b.ToTable("DefaultSubjects");
                 });
 
+            modelBuilder.Entity("EduVerse.Data.Dependency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Depend1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend2")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend3")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend4")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend5")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Dependencies");
+                });
+
             modelBuilder.Entity("EduVerse.Data.NewEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -101,6 +132,9 @@ namespace EduVerse.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SubjectId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Topic")
                         .IsRequired()

@@ -1,0 +1,33 @@
+﻿@inherits LayoutComponentBase
+@rendermode InteractiveServer
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Title</title>
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/account.css" />
+</head>
+<body>
+
+    <div>
+        @Body
+    </div>
+
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/site.js"></script>
+    @if (AdditionalScripts != null)
+
+    {
+        @AdditionalScripts
+    }
+</body>
+</html>
+
+@code {
+    [Parameter] public RenderFragment? AdditionalScripts { get; set; }
+    [Parameter] public string Title { get; set; } = "Account Page";
+}

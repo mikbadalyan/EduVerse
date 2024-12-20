@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduVerse.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241126215719_AddUserIdToNewUser")]
-    partial class AddUserIdToNewUser
+    [Migration("20241130221733_AddSubjectIdToNewEntities")]
+    partial class AddSubjectIdToNewEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,80 @@ namespace EduVerse.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("EduVerse.Data.DefaultSubject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Coin")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Lesson")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LessonType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PathName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DefaultSubjects");
+                });
+
+            modelBuilder.Entity("EduVerse.Data.Dependency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Depend1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend2")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend3")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend4")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Depend5")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Dependencies");
+                });
 
             modelBuilder.Entity("EduVerse.Data.NewEntity", b =>
                 {
@@ -62,6 +136,9 @@ namespace EduVerse.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("SubjectId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Topic")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -82,6 +159,9 @@ namespace EduVerse.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Coin")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()

@@ -1,0 +1,84 @@
+﻿@page "/login"
+@using EduVerseWeb.ViewModels
+@inject NavigationManager Navigation
+@inject Services.AccountService AccountService
+@rendermode InteractiveServer
+
+<PageTitle>Login</PageTitle>
+
+<div class="account-container">
+    <div class="account-box">
+        <h2 class="text-center mb-4">Login</h2>
+        <EditForm Model="LoginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label for="Email" class="form-label">Email</label>
+                <InputText id="Email" class="form-control" @bind-Value="LoginModel.Email" />
+                <ValidationMessage For="@(() => LoginModel.Email)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="Password" class="form-label">Password</label>
+                <InputText id="Password" class="form-control" type="password" @bind-Value="LoginModel.Password" />
+                <ValidationMessage For="@(() => LoginModel.Password)" class="text-danger" />
+            </div>
+
+            <div class="float-end">
+                <a class="text-decoration-none" @onclick="NavigateToVerifyEmail">Forgot password?</a>
+            </div>
+
+            <div class="form-check mb-3">
+                <label class="form-check-label">
+                    <InputCheckbox class="form-check-input" @bind-Value="LoginModel.RememberMe" />
+                    Remember me
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 p-2">Login</button>
+            <p class="text-center mt-2">
+                Don't have an account? <a class="text-decoration-none" @onclick="NavigateToRegister">Register</a>
+            </p>
+            <div class="text-center">
+                <a class="text-decoration-none mt-3" @onclick="NavigateToHome">Back</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginViewModel LoginModel = new();
+
+    private async Task HandleLogin()
+    {
+        var result = await AccountService.LoginAsync(LoginModel);
+        if (result.IsSuccess)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            // Display errors if login fails
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine(error);
+            }
+        }
+    }
+
+    private void NavigateToVerifyEmail()
+    {
+        Navigation.NavigateTo("/verify-email");
+    }
+
+    private void NavigateToRegister()
+    {
+        Navigation.NavigateTo("/register");
+    }
+
+    private void NavigateToHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
