@@ -1,0 +1,43 @@
+﻿@page "/verify-email"
+@using EduVerse.ViewModels
+@inject NavigationManager Navigation
+@inject Services.AccountService AccountService
+@rendermode InteractiveServer
+
+<PageTitle>Verify Email</PageTitle>
+
+<div class="account-container">
+    <div class="account-box">
+        <h2 class="text-center mb-4">Verify Email</h2>
+        <EditForm Model="VerifyEmailModel">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label for="Email" class="form-label">Email</label>
+                <InputText id="Email" class="form-control" @bind-Value="VerifyEmailModel.Email" />
+                <ValidationMessage For="@(() => VerifyEmailModel.Email)" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 p-2">Verify</button>
+
+            <div class="text-center mt-2">
+                <a class="text-decoration-none mt-3" @onclick="NavigateToHome">Back</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private VerifyEmailViewModel VerifyEmailModel = new();
+
+
+
+    private void NavigateToHome()
+
+    {
+
+        Navigation.NavigateTo("/");
+
+    }
+}
