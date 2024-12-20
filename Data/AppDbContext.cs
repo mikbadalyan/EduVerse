@@ -83,6 +83,7 @@ namespace EduVerse.Data
         public int? Depend3 { get; set; }
         public int? Depend4 { get; set; }
         public int? Depend5 { get; set; }
+
     }
 
     public class Users : IdentityUser
@@ -105,5 +106,6 @@ namespace EduVerse.Data
         public byte[] PDF { get; set; }
         public string Tasks { get; set; }
         public string Level { get; set; }
+        public DateTime Date { get; set; } // New Date column
     }
 }
