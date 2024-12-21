@@ -5,8 +5,9 @@
 }
 
 header, footer {
-    background-color: #f8f9fa;
-    padding: 1rem;
+    background-color: #1C375B;
+    color: white;
+    padding: 10px;
 }
 
 main {

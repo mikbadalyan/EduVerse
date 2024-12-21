@@ -1,4 +1,8 @@
-﻿.date-boxes {
+﻿body {
+    background-color: #1C375B;
+}
+
+.date-boxes {
     display: flex;
     flex-direction: column-reverse;
     gap: 10px;
@@ -8,7 +12,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 1px solid #ccc;
+    
     padding: 10px;
     margin: 5px;
 }
@@ -22,13 +26,21 @@
 
 .clickable-box {
     cursor: pointer;
-    padding: 10px;
+    padding: 20px 10px; /* Make boxes taller but thinner */
     margin: 5px;
-    border-radius: 5px;
+    border-radius: 50px; /* Very rounded corners */
     text-align: center;
+    width: 100px; /* Adjust width to make it thinner */
 }
 
 .date-footer {
     margin-top: 10px;
     font-weight: bold;
+    color: #FFE6A6; /* Change color of dates */
+}
+
+.subject-name {
+    margin-left: 10px;
+    align-self: center;
+    color: #FFE6A6; /* Change color of subject name */
 }
