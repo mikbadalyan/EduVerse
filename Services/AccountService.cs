@@ -1,33 +1,31 @@
 ﻿using EduVerse.ViewModels;
-using EduVerse.Models;
-using EduVerse.ViewModels;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Linq;
+using EduVerse.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduVerse.Services
 {
     public class AccountService
     {
-        private readonly SignInManager<Users> _signInManager;
-        private readonly UserManager<Users> _userManager;
+        private AppDbContext _dbContext;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
         //private readonly IEmailSender _emailSender;
         private readonly ILogger<AccountService> _logger;
 
-        public AccountService(SignInManager<Users> signInManager,
-                              UserManager<Users> userManager,
+        public AccountService(AppDbContext appDbContext,
+                              SignInManager<User> signInManager,
+                              UserManager<User> userManager,
                               //IEmailSender emailSender,
                               ILogger<AccountService> logger)
         {
+            _dbContext = appDbContext;
             _signInManager = signInManager;
             _userManager = userManager;
             //_emailSender = emailSender;
             _logger = logger;
         }
 
-        // Login Method (no changes needed)
         public async Task<(bool IsSuccess, IEnumerable<string> Errors)> LoginAsync(LoginViewModel model)
         {
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
@@ -41,7 +39,6 @@ namespace EduVerse.Services
             }
         }
 
-        // Change Password Method (no changes needed)
         public async Task<(bool IsSuccess, IEnumerable<string> Errors)> ChangePasswordAsync(ChangePasswordViewModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -59,43 +56,40 @@ namespace EduVerse.Services
             return (false, result.Errors.Select(e => e.Description));
         }
 
-        // Register User and Send Email Verification Token
         public async Task<(bool IsSuccess, IEnumerable<string> Errors)> RegisterAsync(RegisterViewModel model)
         {
-            var user = new Users
-            {
-                UserName = model.Email,
-                Email = model.Email,
-                FullName = model.Name
-            };
+            var errors = new List<string>();
 
-            // Create User
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+            // Check if the user already exists
+            if (await _dbContext.Users.AnyAsync(u => u.Email == model.Email))
             {
-                return (false, result.Errors.Select(e => e.Description));
+                errors.Add("Email is already registered.");
+                return (false, errors);
             }
 
-            // Generate Email Confirmation Token
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationLink = $"https://yourdomain.com/verifyemail?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+            // Hash the password
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
-            // Send Email Confirmation Link
-            //try
-            //{
-            //    await _emailSender.SendEmailAsync(
-            //        user.Email,
-            //        "Please confirm your email",
-            //        $"Click the following link to confirm your email: <a href='{confirmationLink}'>Confirm Email</a>"
-            //    );
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex, "Error sending confirmation email.");
-            //    return (false, new[] { "Error sending confirmation email." });
-            //}
+            // Create a new user
+            var user = new User
+            {
+                Name = model.Name,
+                Email = model.Email,
+                PasswordHash = passwordHash,
+            };
 
-            return (true, Enumerable.Empty<string>());
+            // Save to the database
+            try
+            {
+                _dbContext.Users.Add(user);
+                await _dbContext.SaveChangesAsync();
+                return (true, Enumerable.Empty<string>());
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Error saving user: {ex.Message}");
+                return (false, errors);
+            }
         }
 
 

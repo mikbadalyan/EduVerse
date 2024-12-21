@@ -1,7 +1,6 @@
 using EduVerse.Components;
 using EduVerse.Data;
 using Microsoft.EntityFrameworkCore;
-using EduVerse.Models;
 using EduVerse.Services;
 using Microsoft.AspNetCore.Identity;
 
@@ -15,7 +14,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<EduVerse.Models.Users, IdentityRole>(options =>
+builder.Services.AddIdentity<EduVerse.Data.User, IdentityRole>(options =>
 {
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 8;

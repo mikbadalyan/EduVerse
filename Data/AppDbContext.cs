@@ -1,17 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using EduVerse.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace EduVerse.Data
 {
-    public class AppDbContext : IdentityDbContext<Users>
+    public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         // Define your DbSets (tables) here
         public DbSet<NewEntity> NewEntities { get; set; }
-        public DbSet<User> Users { get; set; } // DbSet for Users
         public DbSet<DefaultSubject> DefaultSubjects { get; set; } // DbSet for DefaultSubjects
         public DbSet<Dependency> Dependencies { get; set; } // DbSet for Dependencies
 
@@ -31,11 +29,6 @@ namespace EduVerse.Data
             }
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            // Additional configuration if needed
-        }
     }
 
     public class NewEntity
@@ -54,11 +47,13 @@ namespace EduVerse.Data
         public int? SubjectId { get; set; } // New column
     }
 
-    public class User
+    public class User : IdentityUser
     {
-        public int Id { get; set; }
-        public required string UserId { get; set; }
+        public string? UserId { get; set; }
         public int Coin { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? PasswordHash { get; set; }
     }
 
     public class DefaultSubject
@@ -85,9 +80,4 @@ namespace EduVerse.Data
         public int? Depend5 { get; set; }
     }
 
-    public class Users : IdentityUser
-    {
-        public string FullName { get; set; }
-        public bool EmailConfirmed { get; set; }
-    }
 }

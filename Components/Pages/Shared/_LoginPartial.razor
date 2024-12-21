@@ -1,9 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Components.Authorization
-@using EduVerse.Models
+@using EduVerse.Data
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject SignInManager<Users> SignInManager
+@inject SignInManager<User> SignInManager
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
