@@ -6,6 +6,8 @@ namespace EduVerse.ViewModels
     {
         [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; }
+        [Required(ErrorMessage = "Surname is required.")]
+        public string SurName { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress]

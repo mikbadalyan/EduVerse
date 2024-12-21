@@ -14,6 +14,7 @@ namespace EduVerse.Data
         public DbSet<Dependency> Dependencies { get; set; } // DbSet for Dependencies
         public DbSet<TextEntry> TextEntries { get; set; }
         public DbSet<User> Users => Set<User>();
+        public DbSet<StudUser> StudUsers { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -54,6 +55,7 @@ namespace EduVerse.Data
         public string? UserId { get; set; }
         public int Coin { get; set; }
         public string? Name { get; set; }
+        public string? SurName { get; set; }
         public new string? Email { get; set; }
         public new string? PasswordHash { get; set; }
     }

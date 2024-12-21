@@ -27,6 +27,12 @@
             </div>
 
             <div class="mb-3">
+                <label for="SurName" class="form-label">Surname</label>
+                <InputText id="SurName" class="form-control" @bind-Value="RegisterModel.SurName" />
+                <ValidationMessage For="@(() => RegisterModel.SurName)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
                 <label for="Email" class="form-label">Email</label>
                 <InputText id="Email" class="form-control" @bind-Value="RegisterModel.Email" />
                 <ValidationMessage For="@(() => RegisterModel.Email)" class="text-danger" />
@@ -94,6 +100,7 @@
         var user = new User
         {
             Name = model.Name,
+            SurName = model.SurName,
             Email = model.Email,
             Coin = 0,
             PasswordHash = passwordHash,
