@@ -204,11 +204,11 @@
 
             if (status == "Done")
             {
-                var user = await DbContext.Users.FirstOrDefaultAsync(u => u.UserId == selectedEntity.UserId);
+                var user = await DbContext.StudUsers.FirstOrDefaultAsync(u => u.UserId == selectedEntity.UserId);
                 if (user != null)
                 {
                     user.Coin += selectedEntity.Coin;
-                    DbContext.Users.Update(user);
+                    DbContext.StudUsers.Update(user);
                 }
             }
 
@@ -217,6 +217,7 @@
             StateHasChanged(); // Ensure the component re-renders
         }
     }
+
     private async Task ViewPDF(NewEntity entity)
     {
         if (entity.PdfLink != null)
@@ -226,13 +227,14 @@
             await JSRuntime.InvokeVoidAsync("viewPDF", pdfData);
         }
     }
+
     private async Task RegisterUser(string userId)
     {
-        var userExists = await DbContext.Users.AnyAsync(u => u.UserId == userId);
+        var userExists = await DbContext.StudUsers.AnyAsync(u => u.UserId == userId);
         if (!userExists)
         {
             // Register the new user
-            DbContext.Users.Add(new User { UserId = userId });
+            DbContext.StudUsers.Add(new StudUser { UserId = userId });
 
             // Add text entries for the new user
             var textEntries = await DbContext.TextEntries.ToListAsync();
@@ -285,8 +287,6 @@
         }
     }
 
-
-
     private string GetColor(string color)
     {
         return color switch
@@ -299,6 +299,7 @@
         };
     }
 }
+
 <script>
     function viewPDF(pdfData) {
         var win = window.open();
