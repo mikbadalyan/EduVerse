@@ -12,7 +12,7 @@ namespace EduVerse.Data
         public DbSet<NewEntity> NewEntities { get; set; }
         public DbSet<DefaultSubject> DefaultSubjects { get; set; } // DbSet for DefaultSubjects
         public DbSet<Dependency> Dependencies { get; set; } // DbSet for Dependencies
-
+        public DbSet<TextEntry> TextEntries { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -78,6 +78,12 @@ namespace EduVerse.Data
         public int? Depend3 { get; set; }
         public int? Depend4 { get; set; }
         public int? Depend5 { get; set; }
+
     }
 
+    public class Users : IdentityUser
+    {
+        public string FullName { get; set; }
+        public bool EmailConfirmed { get; set; }
+    }
 }

@@ -1,0 +1,273 @@
+﻿@page "/prof"
+@using EduVerse.Data
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext DbContext
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<h3>Lesson Management</h3>
+
+<p>
+    <button class="btn btn-primary" @onclick="ShowForm">Add a Lesson</button>
+</p>
+
+@if (isFormVisible)
+{
+    <div class="mini-page">
+        <EditForm Model="@textEntry" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div>
+                <label for="name">Name:</label>
+                <InputText id="name" @bind-Value="textEntry.Name" class="form-control" />
+            </div>
+            <div>
+                <label for="topic">Topic:</label>
+                <InputText id="topic" @bind-Value="textEntry.Topic" class="form-control" />
+            </div>
+            <div>
+                <label for="lesson">Lesson:</label>
+                <InputNumber id="lesson" @bind-Value="textEntry.Lesson" class="form-control" />
+            </div>
+            <div>
+                <label for="rewardCoin">Reward Coin:</label>
+                <InputNumber id="rewardCoin" @bind-Value="textEntry.Reward_coin" class="form-control" />
+            </div>
+            <div>
+                <label for="lessonType">Lesson Type:</label>
+                <InputText id="lessonType" @bind-Value="textEntry.Lesson_type" class="form-control" />
+            </div>
+            <div>
+                <label for="pathname">Pathname:</label>
+                <InputText id="pathname" @bind-Value="textEntry.Pathname" class="form-control" />
+            </div>
+            <div>
+                <label for="color">Color:</label>
+                <InputText id="color" @bind-Value="textEntry.Color" class="form-control" />
+            </div>
+            <div>
+                <label for="resourcesLink">Resources Link:</label>
+                <InputText id="resourcesLink" @bind-Value="textEntry.Resources_link" class="form-control" />
+            </div>
+            <div>
+                <label for="pdf">PDF:</label>
+                <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
+            </div>
+            <div>
+                <label for="tasks">Tasks:</label>
+                <InputText id="tasks" @bind-Value="textEntry.Tasks" class="form-control" />
+            </div>
+            <div>
+                <label for="level">Level:</label>
+                <InputText id="level" @bind-Value="textEntry.Level" class="form-control" />
+            </div>
+            <div>
+                <label for="date">Date:</label>
+                <InputDate id="date" @bind-Value="textEntry.Date" class="form-control" />
+            </div>
+            <div>
+                <label for="depend1">Dependency 1:</label>
+                <InputNumber id="depend1" @bind-Value="dependencies.Depend1" class="form-control" />
+            </div>
+            <div>
+                <label for="depend2">Dependency 2:</label>
+                <InputNumber id="depend2" @bind-Value="dependencies.Depend2" class="form-control" />
+            </div>
+            <div>
+                <label for="depend3">Dependency 3:</label>
+                <InputNumber id="depend3" @bind-Value="dependencies.Depend3" class="form-control" />
+            </div>
+            <div>
+                <label for="depend4">Dependency 4:</label>
+                <InputNumber id="depend4" @bind-Value="dependencies.Depend4" class="form-control" />
+            </div>
+            <div>
+                <label for="depend5">Dependency 5:</label>
+                <InputNumber id="depend5" @bind-Value="dependencies.Depend5" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </EditForm>
+    </div>
+}
+
+@foreach (var entry in textEntries)
+{
+    <div class="entry-button">
+        <button class="btn btn-secondary m-2" @onclick="() => SelectEntry(entry)">
+            @entry.Name - Lesson: @entry.Lesson - Type: @entry.Lesson_type
+        </button>
+        @if (selectedEntry == entry)
+        {
+            <div class="entry-actions">
+                <button class="btn btn-info m-1" @onclick="() => EditEntry(entry)">Edit</button>
+                <button class="btn btn-warning m-1" @onclick="() => ViewPDF(entry)">View PDF</button>
+                <button class="btn btn-danger m-1" @onclick="() => DeleteEntry(entry)">Delete</button>
+            </div>
+        }
+    </div>
+}
+
+@if (isEditFormVisible && selectedEntry != null)
+{
+    <div class="mini-page">
+        <EditForm Model="@selectedEntry" OnValidSubmit="@HandleEditSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div>
+                <label for="name">Name:</label>
+                <InputText id="name" @bind-Value="selectedEntry.Name" class="form-control" />
+            </div>
+            <div>
+                <label for="topic">Topic:</label>
+                <InputText id="topic" @bind-Value="selectedEntry.Topic" class="form-control" />
+            </div>
+            <div>
+                <label for="lesson">Lesson:</label>
+                <InputNumber id="lesson" @bind-Value="selectedEntry.Lesson" class="form-control" />
+            </div>
+            <div>
+                <label for="rewardCoin">Reward Coin:</label>
+                <InputNumber id="rewardCoin" @bind-Value="selectedEntry.Reward_coin" class="form-control" />
+            </div>
+            <div>
+                <label for="lessonType">Lesson Type:</label>
+                <InputText id="lessonType" @bind-Value="selectedEntry.Lesson_type" class="form-control" />
+            </div>
+            <div>
+                <label for="pathname">Pathname:</label>
+                <InputText id="pathname" @bind-Value="selectedEntry.Pathname" class="form-control" />
+            </div>
+            <div>
+                <label for="color">Color:</label>
+                <InputText id="color" @bind-Value="selectedEntry.Color" class="form-control" />
+            </div>
+            <div>
+                <label for="resourcesLink">Resources Link:</label>
+                <InputText id="resourcesLink" @bind-Value="selectedEntry.Resources_link" class="form-control" />
+            </div>
+            <div>
+                <label for="pdf">PDF:</label>
+                <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
+            </div>
+            <div>
+                <label for="tasks">Tasks:</label>
+                <InputText id="tasks" @bind-Value="selectedEntry.Tasks" class="form-control" />
+            </div>
+            <div>
+                <label for="level">Level:</label>
+                <InputText id="level" @bind-Value="selectedEntry.Level" class="form-control" />
+            </div>
+            <div>
+                <label for="date">Date:</label>
+                <InputDate id="date" @bind-Value="selectedEntry.Date" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </EditForm>
+    </div>
+}
+
+@code {
+    private TextEntry textEntry = new TextEntry();
+    private Dependency dependencies = new Dependency
+    {
+        SubjectId = 0
+    };
+    private List<TextEntry> textEntries = new List<TextEntry>();
+    private TextEntry? selectedEntry;
+    private bool isFormVisible = false;
+    private bool isEditFormVisible = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        textEntries = await DbContext.TextEntries.ToListAsync();
+    }
+
+    private void ShowForm()
+    {
+        isFormVisible = true;
+    }
+
+    private void SelectEntry(TextEntry entry)
+    {
+        selectedEntry = entry;
+    }
+
+    private void EditEntry(TextEntry entry)
+    {
+        selectedEntry = entry;
+        isEditFormVisible = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (textEntry.PDF == null)
+        {
+            // Handle the case where PDF is not set, e.g., show an error message
+            return;
+        }
+
+        DbContext.TextEntries.Add(textEntry);
+        await DbContext.SaveChangesAsync();
+
+        // Get the ID of the last inserted TextEntry
+        var lastTextEntryId = await DbContext.TextEntries.MaxAsync(te => te.Id);
+
+        // Set the SubjectId of the dependencies
+        dependencies.SubjectId = lastTextEntryId;
+
+        // Add the dependencies to the database
+        DbContext.Dependencies.Add(dependencies);
+        await DbContext.SaveChangesAsync();
+
+        textEntries.Add(textEntry);
+        textEntry = new TextEntry();
+        dependencies = new Dependency
+        {
+            SubjectId = 0    
+        };
+        isFormVisible = false;
+    }
+
+    private async Task HandleEditSubmit()
+    {
+        await DbContext.SaveChangesAsync();
+        isEditFormVisible = false;
+    }
+
+    private async Task ViewPDF(TextEntry entry)
+    {
+        if (entry.PDF != null)
+        {
+            var base64PDF = Convert.ToBase64String(entry.PDF);
+            var pdfData = $"data:application/pdf;base64,{base64PDF}";
+            await JSRuntime.InvokeVoidAsync("viewPDF", pdfData);
+        }
+    }
+
+    private async Task DeleteEntry(TextEntry entry)
+    {
+        DbContext.TextEntries.Remove(entry);
+        await DbContext.SaveChangesAsync();
+        textEntries.Remove(entry);
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            if (isFormVisible)
+            {
+                textEntry.PDF = stream.ToArray();
+            }
+            else if (isEditFormVisible && selectedEntry != null)
+            {
+                selectedEntry.PDF = stream.ToArray();
+            }
+        }
+    }
+}
