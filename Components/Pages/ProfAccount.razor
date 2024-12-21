@@ -11,85 +11,92 @@
     <button class="btn btn-primary" @onclick="ShowForm">Add a Lesson</button>
 </p>
 
-@if (isFormVisible)
-{
-    <div class="mini-page">
-        <EditForm Model="@textEntry" OnValidSubmit="@HandleValidSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+<div class="modal fade" id="lessonModal" tabindex="-1" aria-labelledby="lessonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lessonModalLabel">Add a Lesson</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@textEntry" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-            <div>
-                <label for="name">Name:</label>
-                <InputText id="name" @bind-Value="textEntry.Name" class="form-control" />
+                    <div>
+                        <label for="name">Name:</label>
+                        <InputText id="name" @bind-Value="textEntry.Name" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="topic">Topic:</label>
+                        <InputText id="topic" @bind-Value="textEntry.Topic" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="lesson">Lesson:</label>
+                        <InputNumber id="lesson" @bind-Value="textEntry.Lesson" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="rewardCoin">Reward Coin:</label>
+                        <InputNumber id="rewardCoin" @bind-Value="textEntry.Reward_coin" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="lessonType">Lesson Type:</label>
+                        <InputText id="lessonType" @bind-Value="textEntry.Lesson_type" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="pathname">Pathname:</label>
+                        <InputText id="pathname" @bind-Value="textEntry.Pathname" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="color">Color:</label>
+                        <InputText id="color" @bind-Value="textEntry.Color" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="resourcesLink">Resources Link:</label>
+                        <InputText id="resourcesLink" @bind-Value="textEntry.Resources_link" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="pdf">PDF:</label>
+                        <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="tasks">Tasks:</label>
+                        <InputText id="tasks" @bind-Value="textEntry.Tasks" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="level">Level:</label>
+                        <InputText id="level" @bind-Value="textEntry.Level" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="date">Date:</label>
+                        <InputDate id="date" @bind-Value="textEntry.Date" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="depend1">Dependency 1:</label>
+                        <InputNumber id="depend1" @bind-Value="dependencies.Depend1" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="depend2">Dependency 2:</label>
+                        <InputNumber id="depend2" @bind-Value="dependencies.Depend2" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="depend3">Dependency 3:</label>
+                        <InputNumber id="depend3" @bind-Value="dependencies.Depend3" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="depend4">Dependency 4:</label>
+                        <InputNumber id="depend4" @bind-Value="dependencies.Depend4" class="form-control" />
+                    </div>
+                    <div>
+                        <label for="depend5">Dependency 5:</label>
+                        <InputNumber id="depend5" @bind-Value="dependencies.Depend5" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </EditForm>
             </div>
-            <div>
-                <label for="topic">Topic:</label>
-                <InputText id="topic" @bind-Value="textEntry.Topic" class="form-control" />
-            </div>
-            <div>
-                <label for="lesson">Lesson:</label>
-                <InputNumber id="lesson" @bind-Value="textEntry.Lesson" class="form-control" />
-            </div>
-            <div>
-                <label for="rewardCoin">Reward Coin:</label>
-                <InputNumber id="rewardCoin" @bind-Value="textEntry.Reward_coin" class="form-control" />
-            </div>
-            <div>
-                <label for="lessonType">Lesson Type:</label>
-                <InputText id="lessonType" @bind-Value="textEntry.Lesson_type" class="form-control" />
-            </div>
-            <div>
-                <label for="pathname">Pathname:</label>
-                <InputText id="pathname" @bind-Value="textEntry.Pathname" class="form-control" />
-            </div>
-            <div>
-                <label for="color">Color:</label>
-                <InputText id="color" @bind-Value="textEntry.Color" class="form-control" />
-            </div>
-            <div>
-                <label for="resourcesLink">Resources Link:</label>
-                <InputText id="resourcesLink" @bind-Value="textEntry.Resources_link" class="form-control" />
-            </div>
-            <div>
-                <label for="pdf">PDF:</label>
-                <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
-            </div>
-            <div>
-                <label for="tasks">Tasks:</label>
-                <InputText id="tasks" @bind-Value="textEntry.Tasks" class="form-control" />
-            </div>
-            <div>
-                <label for="level">Level:</label>
-                <InputText id="level" @bind-Value="textEntry.Level" class="form-control" />
-            </div>
-            <div>
-                <label for="date">Date:</label>
-                <InputDate id="date" @bind-Value="textEntry.Date" class="form-control" />
-            </div>
-            <div>
-                <label for="depend1">Dependency 1:</label>
-                <InputNumber id="depend1" @bind-Value="dependencies.Depend1" class="form-control" />
-            </div>
-            <div>
-                <label for="depend2">Dependency 2:</label>
-                <InputNumber id="depend2" @bind-Value="dependencies.Depend2" class="form-control" />
-            </div>
-            <div>
-                <label for="depend3">Dependency 3:</label>
-                <InputNumber id="depend3" @bind-Value="dependencies.Depend3" class="form-control" />
-            </div>
-            <div>
-                <label for="depend4">Dependency 4:</label>
-                <InputNumber id="depend4" @bind-Value="dependencies.Depend4" class="form-control" />
-            </div>
-            <div>
-                <label for="depend5">Dependency 5:</label>
-                <InputNumber id="depend5" @bind-Value="dependencies.Depend5" class="form-control" />
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </EditForm>
+        </div>
     </div>
-}
+</div>
 
 @foreach (var entry in textEntries)
 {
@@ -168,12 +175,20 @@
     </div>
 }
 
+<style>
+    .entry-button {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
 @code {
     private TextEntry textEntry = new TextEntry();
     private Dependency dependencies = new Dependency
-    {
-        SubjectId = 0
-    };
+        {
+            SubjectId = 0
+        };
     private List<TextEntry> textEntries = new List<TextEntry>();
     private TextEntry? selectedEntry;
     private bool isFormVisible = false;
@@ -182,16 +197,39 @@
     protected override async Task OnInitializedAsync()
     {
         textEntries = await DbContext.TextEntries.ToListAsync();
+        OnDeselectEntry += HandleDeselectEntry;
+    }
+
+    private void HandleDeselectEntry()
+    {
+        selectedEntry = null;
+        InvokeAsync(StateHasChanged);
     }
 
     private void ShowForm()
     {
         isFormVisible = true;
+        JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('lessonModal')).show()");
     }
 
     private void SelectEntry(TextEntry entry)
     {
         selectedEntry = entry;
+    }
+
+    [JSInvokable("DeselectEntry")]
+    public static Task DeselectEntry()
+    {
+        try
+        {
+            Console.WriteLine("DeselectEntry method called");
+            OnDeselectEntry?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in DeselectEntry: {ex.Message}");
+        }
+        return Task.CompletedTask;
     }
 
     private void EditEntry(TextEntry entry)
@@ -224,10 +262,11 @@
         textEntries.Add(textEntry);
         textEntry = new TextEntry();
         dependencies = new Dependency
-        {
-            SubjectId = 0    
-        };
+            {
+                SubjectId = 0
+            };
         isFormVisible = false;
+        JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('lessonModal')).hide()");
     }
 
     private async Task HandleEditSubmit()
@@ -270,4 +309,19 @@
             }
         }
     }
+
+    public void Dispose()
+    {
+        OnDeselectEntry -= HandleDeselectEntry;
+    }
+
+    private static event Action? OnDeselectEntry;
+}
+
+.entry-button {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    height: auto;
 }
