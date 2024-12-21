@@ -8,19 +8,15 @@
 let previousClickedButton = null;
 
 window.addEventListener('click', function (event) {
-    console.log('Click event detected');
     const clickedElement = event.target;
-    console.log('Clicked element:', clickedElement);
     const isEntryButton = clickedElement.closest('.entry-button');
-    console.log('Is entry button:', isEntryButton);
+    const isEditForm = clickedElement.closest('form');
 
     if (isEntryButton) {
         if (previousClickedButton !== isEntryButton) {
-            console.log('Different entry button clicked');
             previousClickedButton = isEntryButton;
         }
-    } else {
-        console.log('Click outside entry-button detected');
+    } else if (!isEditForm) {
         if (previousClickedButton !== null) {
             DotNet.invokeMethodAsync('EduVerse', 'DeselectEntry')
                 .then(() => console.log('DeselectEntry invoked successfully'))
@@ -29,8 +25,6 @@ window.addEventListener('click', function (event) {
         }
     }
 });
-
-
 
 
 
