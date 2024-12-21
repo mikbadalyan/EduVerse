@@ -15,6 +15,8 @@ namespace EduVerse.Data
         public DbSet<TextEntry> TextEntries { get; set; }
         public DbSet<User> Users => Set<User>();
         public DbSet<StudUser> StudUsers { get; set; }
+        public DbSet<RectangleStatus> RectangleStatuses { get; set; } // Add this line
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -28,6 +30,23 @@ namespace EduVerse.Data
                             maxRetryDelay: TimeSpan.FromSeconds(30), // The maximum delay between retries
                             errorNumbersToAdd: null); // Additional error numbers to consider transient
                     });
+            }
+        }
+
+        public async Task InitializeRectanglesFor2024()
+        {
+            // Add your initialization logic here
+            if (!RectangleStatuses.Any(rs => rs.Date.Year == 2024))
+            {
+                for (int i = 1; i <= 12; i++)
+                {
+                    RectangleStatuses.Add(new RectangleStatus
+                    {
+                        Date = new DateTime(2024, i, 1),
+                        Value = 0
+                    });
+                }
+                await SaveChangesAsync();
             }
         }
     }
@@ -51,9 +70,6 @@ namespace EduVerse.Data
         public List<string> Tasks { get; set; } = new(); // Add this line
     }
 
-
-
-
     public class User : IdentityUser
     {
         public string? UserId { get; set; }
@@ -63,6 +79,7 @@ namespace EduVerse.Data
         public new string? Email { get; set; }
         public new string? PasswordHash { get; set; }
     }
+
     public class StudUser
     {
         public int Id { get; set; }
@@ -84,6 +101,7 @@ namespace EduVerse.Data
         public byte[]? CvPdfLink { get; set; }
         public List<string> SoftSkills { get; set; } = new();
     }
+
     public class RectangleStatus
     {
         public int Id { get; set; }
@@ -103,6 +121,7 @@ namespace EduVerse.Data
         public required string Status { get; set; }
         public required string Color { get; set; }
     }
+
     public class TextEntry
     {
         public int Id { get; set; }
@@ -119,6 +138,7 @@ namespace EduVerse.Data
         public string Level { get; set; }
         public DateTime Date { get; set; }
     }
+
     public class Dependency
     {
         public int Id { get; set; }
@@ -128,7 +148,5 @@ namespace EduVerse.Data
         public int? Depend3 { get; set; }
         public int? Depend4 { get; set; }
         public int? Depend5 { get; set; }
-
     }
-
 }
