@@ -28,7 +28,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<UserManager<User>>(); // Add this line
+builder.Services.AddScoped<UserManager<User>>(); 
 builder.Services.AddScoped<SignInManager<User>>();
 builder.Services.AddScoped<AccountService>();
 

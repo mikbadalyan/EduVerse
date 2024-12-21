@@ -28,16 +28,23 @@ namespace EduVerse.Services
 
         public async Task<(bool IsSuccess, IEnumerable<string> Errors)> LoginAsync(LoginViewModel model)
         {
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
-            if (result.Succeeded)
-            {
-                return (true, Enumerable.Empty<string>());
-            }
-            else
+            // Find user by email
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+
+            if (user == null)
             {
                 return (false, new[] { "Invalid email or password." });
             }
+
+            // Verify the password
+            if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+            {
+                return (false, new[] { "Invalid email or password." });
+            }
+
+            return (true, Enumerable.Empty<string>());
         }
+
 
         public async Task<(bool IsSuccess, IEnumerable<string> Errors)> ChangePasswordAsync(ChangePasswordViewModel model)
         {
@@ -56,43 +63,7 @@ namespace EduVerse.Services
             return (false, result.Errors.Select(e => e.Description));
         }
 
-        public async Task<(bool IsSuccess, IEnumerable<string> Errors)> RegisterAsync(RegisterViewModel model)
-        {
-            var errors = new List<string>();
-
-            // Check if the user already exists
-            if (await _dbContext.Users.AnyAsync(u => u.Email == model.Email))
-            {
-                errors.Add("Email is already registered.");
-                return (false, errors);
-            }
-
-            // Hash the password
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
-
-            // Create a new user
-            var user = new User
-            {
-                Name = model.Name,
-                Email = model.Email,
-                PasswordHash = passwordHash,
-            };
-
-            // Save to the database
-            try
-            {
-                _dbContext.Users.Add(user);
-                await _dbContext.SaveChangesAsync();
-                return (true, Enumerable.Empty<string>());
-            }
-            catch (Exception ex)
-            {
-                errors.Add($"Error saving user: {ex.Message}");
-                return (false, errors);
-            }
-        }
-
-
+        
         //public async Task<(bool IsSuccess, IEnumerable<string> Errors)> VerifyEmailAsync(string userId, string token)
         //{
         //    var user = await _userManager.FindByIdAsync(userId);

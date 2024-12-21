@@ -6,9 +6,9 @@
 @using BCrypt.Net
 @using Microsoft.EntityFrameworkCore
 
+@inject AppDbContext AppDbContext
 @inject NavigationManager Navigation
 @inject AccountService AccountService
-@inject AppDbContext AppDbContext
 @rendermode InteractiveServer
 
 <PageTitle>Register</PageTitle>
@@ -24,6 +24,12 @@
                 <label for="Name" class="form-label">Name</label>
                 <InputText id="Name" class="form-control" @bind-Value="RegisterModel.Name" />
                 <ValidationMessage For="@(() => RegisterModel.Name)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="SurName" class="form-label">Surname</label>
+                <InputText id="SurName" class="form-control" @bind-Value="RegisterModel.SurName" />
+                <ValidationMessage For="@(() => RegisterModel.SurName)" class="text-danger" />
             </div>
 
             <div class="mb-3">
@@ -94,7 +100,9 @@
         var user = new User
         {
             Name = model.Name,
+            SurName = model.SurName,
             Email = model.Email,
+            Coin = 0,
             PasswordHash = passwordHash,
         };
 
