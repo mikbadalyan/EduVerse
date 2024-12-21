@@ -14,7 +14,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<EduVerse.Models.Users, IdentityRole>(options =>
+builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 8;
@@ -28,9 +28,12 @@ builder.Services.AddIdentity<EduVerse.Models.Users, IdentityRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<UserManager<User>>(); // Add this line
+builder.Services.AddScoped<SignInManager<User>>();
 builder.Services.AddScoped<AccountService>();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
