@@ -6,9 +6,9 @@
 @using BCrypt.Net
 @using Microsoft.EntityFrameworkCore
 
+@inject AppDbContext AppDbContext
 @inject NavigationManager Navigation
 @inject AccountService AccountService
-@inject AppDbContext AppDbContext
 @rendermode InteractiveServer
 
 <PageTitle>Register</PageTitle>
@@ -95,6 +95,7 @@
         {
             Name = model.Name,
             Email = model.Email,
+            Coin = 0,
             PasswordHash = passwordHash,
         };
 
