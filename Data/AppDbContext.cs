@@ -37,22 +37,23 @@ namespace EduVerse.Data
             // Additional configuration if needed
         }
     }
+public class NewEntity
+{
+    public int Id { get; set; }
+    public required string Name { get; set; }
+    public required string Topic { get; set; }
+    public int Lesson { get; set; }
+    public int Coin { get; set; }
+    public required string LessonType { get; set; }
+    public DateTime Date { get; set; }
+    public required string PathName { get; set; }
+    public required string Status { get; set; }
+    public required string Color { get; set; }
+    public required string UserId { get; set; }
+    public int? SubjectId { get; set; } // New column
+    public required byte[] PdfLink { get; set; } // Change this property to byte array
+}
 
-    public class NewEntity
-    {
-        public int Id { get; set; }
-        public required string Name { get; set; }
-        public required string Topic { get; set; }
-        public int Lesson { get; set; }
-        public int Coin { get; set; }
-        public required string LessonType { get; set; }
-        public DateTime Date { get; set; }
-        public required string PathName { get; set; }
-        public required string Status { get; set; }
-        public required string Color { get; set; }
-        public required string UserId { get; set; }
-        public int? SubjectId { get; set; } // New column
-    }
 
     public class User
     {

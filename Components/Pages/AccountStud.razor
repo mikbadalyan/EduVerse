@@ -8,7 +8,55 @@
 @rendermode InteractiveServer
 @layout AccountLayout
 
-<h3>AccountStud</h3>
+<style>
+    body {
+        background-color: #1C375B;
+    }
+
+    .clickable-box {
+        width: 50px;
+        height: 400px;
+        margin: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .clickable-boxes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .date-box {
+        margin-bottom: 20px;
+    }
+
+    .date-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+        .date-footer::before,
+        .date-footer::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #000;
+            margin: 0 10px;
+        }
+
+    .subject-name {
+        text-align: center;
+        margin-top: 5px;
+    }
+</style>
 
 <div class="date-boxes" id="date-boxes">
     @foreach (var date in dates)
@@ -16,22 +64,19 @@
         var entities = newEntities.Where(e => e.Date.Date == date.Date).ToList();
         <div class="date-box" id="date-@date.ToString("yyyyMMdd")">
             <div class="clickable-boxes">
-                @foreach (var entity in entities)
+                @foreach (var entity in entities.Select((value, index) => new { value, index }))
                 {
-                    <div class="clickable-box" style="background-color:@(entity.Color);" @onclick="() => ShowDetails(entity)">
-                        <p>Name: @entity.Name</p>
-                        <p>Topic: @entity.Topic</p>
-                        <p>Lesson: @entity.Lesson</p>
-                        <p>Coin: @entity.Coin</p>
-                        <p>Lesson Type: @entity.LessonType</p>
+                    <div class="clickable-box" style="background-color:@(GetColor(entity.value.Color));" @onclick="() => ShowDetails(entity.value)">
+                        <p>@entity.value.Topic</p>
+                        <p>@entity.value.LessonType</p>
                     </div>
+                    <div class="subject-name">@entity.value.Name</div>
                 }
             </div>
-            <div class="date-footer">@date.ToShortDateString()</div>
+            <div class="date-footer">@date.ToString("MM.dd.yyyy")</div>
         </div>
     }
 </div>
-
 @if (selectedEntity != null)
 {
     <div class="modal fade show" style="display: block;" tabindex="-1">
@@ -55,6 +100,13 @@
                         <button class="btn btn-secondary" @onclick="@(async () => await UpdateStatus("Done"))">Done</button>
                         <button class="btn btn-secondary" @onclick="@(async () => await UpdateStatus("I Have Difficulty"))">I Have Difficulty</button>
                     </div>
+                    @if (selectedEntity.PdfLink != null && selectedEntity.PdfLink.Length > 0)
+                    {
+                        <div class="mt-3">
+                            <h6>PDF Resource</h6>
+                            <button class="btn btn-primary" @onclick="@(async () => await ViewPDF(selectedEntity))">View PDF</button>
+                        </div>
+                    }
                     <div class="mt-3">
                         <h6>Pinned Resources</h6>
                         <ul>
@@ -86,12 +138,17 @@
     private List<NewEntity> newEntities = new();
     private List<DateTime> dates = new()
     {
-        new DateTime(2024, 11, 25),
-        new DateTime(2024, 11, 26),
-        new DateTime(2024, 11, 27),
-        new DateTime(2024, 11, 28),
-        new DateTime(2024, 11, 29),
-        new DateTime(2024, 11, 30)
+        new DateTime(2024, 12, 21),
+        new DateTime(2024, 12, 22),
+        new DateTime(2024, 12, 23),
+        new DateTime(2024, 12, 24),
+        new DateTime(2024, 12, 25),
+        new DateTime(2024, 12, 26),
+        new DateTime(2024, 12, 27),
+        new DateTime(2024, 12, 28),
+        new DateTime(2024, 12, 29),
+        new DateTime(2024, 12, 30),
+        new DateTime(2024, 12, 31)
     };
 
     private NewEntity? selectedEntity; // Make selectedEntity nullable
@@ -139,8 +196,10 @@
             selectedEntity.Color = status switch
             {
                 "Done" => "green",
-                "Locked" => "grey",
-                _ => selectedEntity.Color
+                "In Progress" => "yellow",
+                "I Have Difficulty" => "red",
+                "Not Done" => "grey",
+                _ => "grey"
             };
 
             if (status == "Done")
@@ -153,10 +212,20 @@
                 }
             }
 
+            DbContext.NewEntities.Update(selectedEntity);
             await DbContext.SaveChangesAsync();
+            StateHasChanged(); // Ensure the component re-renders
         }
     }
-
+    private async Task ViewPDF(NewEntity entity)
+    {
+        if (entity.PdfLink != null)
+        {
+            var base64PDF = Convert.ToBase64String(entity.PdfLink);
+            var pdfData = $"data:application/pdf;base64,{base64PDF}";
+            await JSRuntime.InvokeVoidAsync("viewPDF", pdfData);
+        }
+    }
     private async Task RegisterUser(string userId)
     {
         var userExists = await DbContext.Users.AnyAsync(u => u.UserId == userId);
@@ -165,24 +234,74 @@
             // Register the new user
             DbContext.Users.Add(new User { UserId = userId });
 
-            // Add default subjects for the new user
-            var defaultSubjects = await DbContext.DefaultSubjects.ToListAsync();
-            var newEntities = defaultSubjects.Select(ds => new NewEntity
+            // Add text entries for the new user
+            var textEntries = await DbContext.TextEntries.ToListAsync();
+            var newEntities = textEntries.Select(te => new NewEntity
                 {
-                    Name = ds.Name,
-                    Topic = ds.Topic,
-                    Lesson = ds.Lesson,
-                    Coin = ds.Coin,
-                    LessonType = ds.LessonType,
+                    Name = te.Name,
+                    Topic = te.Topic,
+                    Lesson = te.Lesson,
+                    Coin = te.Reward_coin,
+                    LessonType = te.Lesson_type,
                     Date = DateTime.Now,
-                    PathName = ds.PathName,
-                    Status = ds.Status,
-                    Color = ds.Color,
-                    UserId = userId
+                    PathName = te.Pathname,
+                    Status = te.Lesson > 1 ? "Locked" : "Unlocked",
+                    Color = "grey", // Set default color to grey
+                    UserId = userId,
+                    PdfLink = te.PDF // Store the PDF as a byte array
                 }).ToList();
 
             DbContext.NewEntities.AddRange(newEntities);
             await DbContext.SaveChangesAsync();
         }
+        else
+        {
+            // Check for new text entries and add them for the existing user
+            var existingEntities = await DbContext.NewEntities.Where(e => e.UserId == userId).ToListAsync();
+            var textEntries = await DbContext.TextEntries.ToListAsync();
+
+            var newEntities = textEntries
+                .Where(te => !existingEntities.Any(ee => ee.Name == te.Name && ee.Topic == te.Topic))
+                .Select(te => new NewEntity
+                    {
+                        Name = te.Name,
+                        Topic = te.Topic,
+                        Lesson = te.Lesson,
+                        Coin = te.Reward_coin,
+                        LessonType = te.Lesson_type,
+                        Date = DateTime.Now,
+                        PathName = te.Pathname,
+                        Status = te.Lesson > 1 ? "Locked" : "Unlocked",
+                        Color = "grey", // Set default color to grey
+                        UserId = userId,
+                        PdfLink = te.PDF // Store the PDF as a byte array
+                    }).ToList();
+
+            if (newEntities.Any())
+            {
+                DbContext.NewEntities.AddRange(newEntities);
+                await DbContext.SaveChangesAsync();
+            }
+        }
+    }
+
+
+
+    private string GetColor(string color)
+    {
+        return color switch
+        {
+            "red" => "#ee6c4d",
+            "yellow" => "#F5DA55",
+            "green" => "#92E3A9",
+            "grey" => "#D3D3D3",
+            _ => color
+        };
     }
 }
+<script>
+    function viewPDF(pdfData) {
+        var win = window.open();
+        win.document.write('<iframe src="' + pdfData + '" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>');
+    }
+</script>
