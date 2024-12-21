@@ -34,6 +34,12 @@ builder.Services.AddScoped<AccountService>();
 
 var app = builder.Build();
 
+// Initialize rectangles for 2024
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.InitializeRectanglesFor2024();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

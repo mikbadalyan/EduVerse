@@ -7,11 +7,34 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 @layout AccountLayout
+@using Microsoft.AspNetCore.Components
 
 <style>
     body {
         background-color: #1C375B;
     }
+
+    .filter-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+
+        .filter-options label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .filter-options select,
+        .filter-options input {
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
 
     .clickable-box {
         width: 50px;
@@ -58,23 +81,58 @@
     }
 </style>
 
+<div class="filter-options">
+    <label for="subjectFilter">Filter by Subject:</label>
+    <select id="subjectFilter" @onchange="OnSubjectFilterChanged">
+        <option value="">All Subjects</option>
+        @foreach (var subject in subjects)
+        {
+            <option value="@subject">@subject</option>
+        }
+    </select>
+
+    <label for="lessonNumberFilter">Filter by Lesson Number:</label>
+    <input type="number" id="lessonNumberFilter" @oninput="OnLessonNumberFilterChanged" />
+
+    <label for="statusFilter">Filter by Status:</label>
+    <select id="statusFilter" @onchange="OnStatusFilterChanged">
+        <option value="">All Statuses</option>
+        <option value="Done">Done</option>
+        <option value="In Progress">In Progress</option>
+        <option value="I Have Difficulty">I Have Difficulty</option>
+        <option value="Not Done">Not Done</option>
+        <option value="Locked">Locked</option>
+        <option value="Unlocked">Unlocked</option>
+    </select>
+
+    <label for="dateFilter">Filter by Date:</label>
+    <input type="date" id="dateFilter" @oninput="OnDateFilterChanged" />
+
+    <label for="pathnameFilter">Filter by Pathname:</label>
+    <input type="text" id="pathnameFilter" @oninput="OnPathnameFilterChanged" />
+</div>
+
+
 <div class="date-boxes" id="date-boxes">
     @foreach (var date in dates)
     {
-        var entities = newEntities.Where(e => e.Date.Date == date.Date).ToList();
-        <div class="date-box" id="date-@date.ToString("yyyyMMdd")">
-            <div class="clickable-boxes">
-                @foreach (var entity in entities.Select((value, index) => new { value, index }))
-                {
-                    <div class="clickable-box" style="background-color:@(GetColor(entity.value.Color));" @onclick="() => ShowDetails(entity.value)">
-                        <p>@entity.value.Topic</p>
-                        <p>@entity.value.LessonType</p>
-                    </div>
-                    <div class="subject-name">@entity.value.Name</div>
-                }
+        var entities = filteredEntities.Where(e => e.Date.Date == date.Date).ToList();
+        if (entities.Any())
+        {
+            <div class="date-box" id="date-@date.ToString("yyyyMMdd")">
+                <div class="clickable-boxes">
+                    @foreach (var entity in entities.Select((value, index) => new { value, index }))
+                    {
+                        <div class="clickable-box" style="background-color:@(GetColor(entity.value.Color));" @onclick="() => ShowDetails(entity.value)">
+                            <p>@entity.value.Topic</p>
+                            <p>@entity.value.LessonType</p>
+                        </div>
+                        <div class="subject-name">@entity.value.Name</div>
+                    }
+                </div>
+                <div class="date-footer">@date.ToString("MM.dd.yyyy")</div>
             </div>
-            <div class="date-footer">@date.ToString("MM.dd.yyyy")</div>
-        </div>
+        }
     }
 </div>
 @if (selectedEntity != null)
@@ -110,20 +168,20 @@
                     <div class="mt-3">
                         <h6>Pinned Resources</h6>
                         <ul>
-                            <li><a href="#">Lorem ipsum link 1</a></li>
-                            <li><a href="#">Lorem ipsum link 2</a></li>
-                            <li><a href="#">Lorem ipsum link 3</a></li>
+                            @foreach (var resource in selectedEntity.Resources)
+                            {
+                                <li>@resource</li>
+                            }
                         </ul>
-                        <button class="btn btn-link">Show More Resources</button>
                     </div>
                     <div class="mt-3">
                         <h6>Tasks</h6>
                         <ul>
-                            <li>Task 1: Lorem ipsum</li>
-                            <li>Task 2: Lorem ipsum</li>
-                            <li>Task 3: Lorem ipsum</li>
+                            @foreach (var task in selectedEntity.Tasks)
+                            {
+                                <li>@task</li>
+                            }
                         </ul>
-                        <button class="btn btn-link">Show More Tasks</button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -136,6 +194,7 @@
 
 @code {
     private List<NewEntity> newEntities = new();
+    private List<NewEntity> filteredEntities = new();
     private List<DateTime> dates = new()
     {
         new DateTime(2024, 12, 21),
@@ -152,7 +211,14 @@
     };
 
     private NewEntity? selectedEntity; // Make selectedEntity nullable
-    private bool isFirstRender = true;
+    private List<string> subjects = new();
+    private List<string> lessonTypes = new();
+
+    private string subjectFilter = string.Empty;
+    private int? lessonNumberFilter = null;
+    private string statusFilter = string.Empty;
+    private DateTime? dateFilter = null;
+    private string pathnameFilter = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -168,19 +234,73 @@
             await RegisterUser(userId);
 
             newEntities = await DbContext.NewEntities.Where(e => e.UserId == userId).ToListAsync();
+            filteredEntities = newEntities;
+
+            subjects = newEntities.Select(e => e.Name).Distinct().ToList();
+            lessonTypes = newEntities.Select(e => e.LessonType).Distinct().ToList();
 
             var currentDate = DateTime.Now.Date;
             var currentBoxId = $"date-{currentDate:yyyyMMdd}";
             await JSRuntime.InvokeVoidAsync("scrollToElement", currentBoxId);
 
-            isFirstRender = false;
             StateHasChanged();
         }
+    }
+
+    private void FilterEntities()
+    {
+        filteredEntities = newEntities
+            .Where(e => (string.IsNullOrEmpty(subjectFilter) || e.Name == subjectFilter) &&
+                        (!lessonNumberFilter.HasValue || e.Lesson == lessonNumberFilter.Value) &&
+                        (string.IsNullOrEmpty(statusFilter) || e.Status == statusFilter) &&
+                        (!dateFilter.HasValue || e.Date.Date == dateFilter.Value.Date) &&
+                        (string.IsNullOrEmpty(pathnameFilter) || e.PathName.Contains(pathnameFilter, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        StateHasChanged();
+    }
+
+    private void OnSubjectFilterChanged(ChangeEventArgs e)
+    {
+        subjectFilter = e.Value?.ToString() ?? string.Empty;
+        FilterEntities();
+    }
+
+    private void OnLessonNumberFilterChanged(ChangeEventArgs e)
+    {
+        lessonNumberFilter = int.TryParse(e.Value?.ToString(), out var lessonNumber) ? lessonNumber : (int?)null;
+        FilterEntities();
+    }
+
+    private void OnStatusFilterChanged(ChangeEventArgs e)
+    {
+        statusFilter = e.Value?.ToString() ?? string.Empty;
+        FilterEntities();
+    }
+
+    private void OnDateFilterChanged(ChangeEventArgs e)
+    {
+        dateFilter = DateTime.TryParse(e.Value?.ToString(), out var date) ? date : (DateTime?)null;
+        FilterEntities();
+    }
+
+    private void OnPathnameFilterChanged(ChangeEventArgs e)
+    {
+        pathnameFilter = e.Value?.ToString() ?? string.Empty;
+        FilterEntities();
     }
 
     private void ShowDetails(NewEntity entity)
     {
         selectedEntity = entity;
+        selectedEntity.Resources = DbContext.TextEntries
+            .Where(te => te.Name == entity.Name && te.Topic == entity.Topic)
+            .Select(te => te.Resources_link)
+            .ToList();
+        selectedEntity.Tasks = DbContext.TextEntries
+            .Where(te => te.Name == entity.Name && te.Topic == entity.Topic)
+            .Select(te => te.Tasks)
+            .ToList();
     }
 
     private void CloseDetails()
@@ -210,6 +330,39 @@
                     user.Coin += selectedEntity.Coin;
                     DbContext.StudUsers.Update(user);
                 }
+
+                // Check for dependencies and update their status
+                var dependencies = await DbContext.Dependencies
+                    .Where(d => d.SubjectId == selectedEntity.SubjectId)
+                    .ToListAsync();
+
+                foreach (var dependency in dependencies)
+                {
+                    var dependentSubjects = new List<int?> { dependency.Depend1, dependency.Depend2, dependency.Depend3, dependency.Depend4, dependency.Depend5 };
+                    foreach (var dependentSubjectId in dependentSubjects)
+                    {
+                        if (dependentSubjectId.HasValue)
+                        {
+                            var dependentEntity = await DbContext.NewEntities
+                                .FirstOrDefaultAsync(e => e.SubjectId == dependentSubjectId.Value && e.UserId == selectedEntity.UserId);
+
+                            if (dependentEntity != null && dependentEntity.Status == "Locked")
+                            {
+                                dependentEntity.Status = "Unlocked";
+                                DbContext.NewEntities.Update(dependentEntity);
+                            }
+                        }
+                    }
+                }
+
+                // Increment the value of the rectangle for today's date
+                var today = DateTime.Today;
+                var rectangle = await DbContext.RectangleStatuses.FirstOrDefaultAsync(r => r.Date == today);
+                if (rectangle != null)
+                {
+                    rectangle.Value += 1;
+                    DbContext.RectangleStatuses.Update(rectangle);
+                }
             }
 
             DbContext.NewEntities.Update(selectedEntity);
@@ -217,6 +370,7 @@
             StateHasChanged(); // Ensure the component re-renders
         }
     }
+
 
     private async Task ViewPDF(NewEntity entity)
     {
@@ -245,12 +399,13 @@
                     Lesson = te.Lesson,
                     Coin = te.Reward_coin,
                     LessonType = te.Lesson_type,
-                    Date = DateTime.Now,
+                    Date = te.Date, // Use the date from TextEntries
                     PathName = te.Pathname,
                     Status = te.Lesson > 1 ? "Locked" : "Unlocked",
                     Color = "grey", // Set default color to grey
                     UserId = userId,
-                    PdfLink = te.PDF // Store the PDF as a byte array
+                    PdfLink = te.PDF, // Store the PDF as a byte array
+                    SubjectId = te.Id // Add SubjectId
                 }).ToList();
 
             DbContext.NewEntities.AddRange(newEntities);
@@ -271,12 +426,13 @@
                         Lesson = te.Lesson,
                         Coin = te.Reward_coin,
                         LessonType = te.Lesson_type,
-                        Date = DateTime.Now,
+                        Date = te.Date, // Use the date from TextEntries
                         PathName = te.Pathname,
                         Status = te.Lesson > 1 ? "Locked" : "Unlocked",
                         Color = "grey", // Set default color to grey
                         UserId = userId,
-                        PdfLink = te.PDF // Store the PDF as a byte array
+                        PdfLink = te.PDF, // Store the PDF as a byte array
+                        SubjectId = te.Id // Add SubjectId
                     }).ToList();
 
             if (newEntities.Any())
@@ -299,6 +455,8 @@
         };
     }
 }
+
+
 
 <script>
     function viewPDF(pdfData) {

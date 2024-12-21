@@ -14,7 +14,28 @@ namespace EduVerse.Data
         public DbSet<Dependency> Dependencies { get; set; } // DbSet for Dependencies
         public DbSet<TextEntry> TextEntries { get; set; }
         public DbSet<StudUser> StudUsers { get; set; } // Add this line
+        public DbSet<RectangleStatus> RectangleStatuses { get; set; }
+        public async Task InitializeRectanglesFor2024()
+        {
+            if (!RectangleStatuses.Any())
+            {
+                var rectangles = new List<RectangleStatus>();
+                var startDate = new DateTime(2024, 1, 1);
+                var endDate = new DateTime(2024, 12, 31);
 
+                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                {
+                    rectangles.Add(new RectangleStatus
+                    {
+                        Date = date,
+                        Value = 0
+                    });
+                }
+
+                RectangleStatuses.AddRange(rectangles);
+                await SaveChangesAsync();
+            }
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -33,21 +54,25 @@ namespace EduVerse.Data
     }
 
     public class NewEntity
-{
-    public int Id { get; set; }
-    public required string Name { get; set; }
-    public required string Topic { get; set; }
-    public int Lesson { get; set; }
-    public int Coin { get; set; }
-    public required string LessonType { get; set; }
-    public DateTime Date { get; set; }
-    public required string PathName { get; set; }
-    public required string Status { get; set; }
-    public required string Color { get; set; }
-    public required string UserId { get; set; }
-    public int? SubjectId { get; set; } // New column
-    public required byte[] PdfLink { get; set; } // Change this property to byte array
-}
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public required string Topic { get; set; }
+        public int Lesson { get; set; }
+        public int Coin { get; set; }
+        public required string LessonType { get; set; }
+        public DateTime Date { get; set; }
+        public required string PathName { get; set; }
+        public required string Status { get; set; }
+        public required string Color { get; set; }
+        public required string UserId { get; set; }
+        public int? SubjectId { get; set; } // New column
+        public required byte[] PdfLink { get; set; } // Change this property to byte array
+        public List<string> Resources { get; set; } = new(); // Add this line
+        public List<string> Tasks { get; set; } = new(); // Add this line
+    }
+
+
 
 
     public class User : IdentityUser
@@ -63,7 +88,29 @@ namespace EduVerse.Data
         public int Id { get; set; }
         public required string UserId { get; set; }
         public int Coin { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? University { get; set; }
+        public string? Address { get; set; }
+        public int? Age { get; set; }
+        public string? Gender { get; set; }
+        public string? Email { get; set; }
+        public string? Name { get; set; }
+        public string? Surname { get; set; }
+        public string? GithubLink { get; set; }
+        public string? LinkedinLink { get; set; }
+        public string? FacebookLink { get; set; }
+        public string? InstagramLink { get; set; }
+        public string? TelegramLink { get; set; }
+        public byte[]? CvPdfLink { get; set; }
+        public List<string> SoftSkills { get; set; } = new();
     }
+    public class RectangleStatus
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public int Value { get; set; }
+    }
+
     public class DefaultSubject
     {
         public int Id { get; set; }
