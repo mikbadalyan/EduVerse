@@ -4,6 +4,7 @@
 @inject AppDbContext DbContext
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
+@layout Components.Layout.ProfLayout
 
 <h3>Lesson Management</h3>
 
@@ -98,6 +99,81 @@
     </div>
 </div>
 
+<div class="modal fade" id="editLessonModal" tabindex="-1" aria-labelledby="editLessonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editLessonModalLabel">Edit Lesson</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseEditModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (selectedEntry != null)
+                {
+                    <EditForm Model="@selectedEntry" OnValidSubmit="@HandleEditSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div>
+                            <label for="name">Name:</label>
+                            <InputText id="name" @bind-Value="selectedEntry.Name" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="topic">Topic:</label>
+                            <InputText id="topic" @bind-Value="selectedEntry.Topic" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="lesson">Lesson:</label>
+                            <InputNumber id="lesson" @bind-Value="selectedEntry.Lesson" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="rewardCoin">Reward Coin:</label>
+                            <InputNumber id="rewardCoin" @bind-Value="selectedEntry.Reward_coin" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="lessonType">Lesson Type:</label>
+                            <InputText id="lessonType" @bind-Value="selectedEntry.Lesson_type" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="pathname">Pathname:</label>
+                            <InputText id="pathname" @bind-Value="selectedEntry.Pathname" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="color">Color:</label>
+                            <InputText id="color" @bind-Value="selectedEntry.Color" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="resourcesLink">Resources Link:</label>
+                            <InputText id="resourcesLink" @bind-Value="selectedEntry.Resources_link" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="pdf">PDF:</label>
+                            <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="tasks">Tasks:</label>
+                            <InputText id="tasks" @bind-Value="selectedEntry.Tasks" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="level">Level:</label>
+                            <InputText id="level" @bind-Value="selectedEntry.Level" class="form-control" />
+                        </div>
+                        <div>
+                            <label for="date">Date:</label>
+                            <InputDate id="date" @bind-Value="selectedEntry.Date" class="form-control" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </EditForm>
+                }
+                else
+                {
+                    <p>No lesson selected for editing.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @foreach (var entry in textEntries)
 {
     <div class="entry-button">
@@ -115,71 +191,23 @@
     </div>
 }
 
-@if (isEditFormVisible && selectedEntry != null)
-{
-    <div class="mini-page">
-        <EditForm Model="@selectedEntry" OnValidSubmit="@HandleEditSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <div>
-                <label for="name">Name:</label>
-                <InputText id="name" @bind-Value="selectedEntry.Name" class="form-control" />
-            </div>
-            <div>
-                <label for="topic">Topic:</label>
-                <InputText id="topic" @bind-Value="selectedEntry.Topic" class="form-control" />
-            </div>
-            <div>
-                <label for="lesson">Lesson:</label>
-                <InputNumber id="lesson" @bind-Value="selectedEntry.Lesson" class="form-control" />
-            </div>
-            <div>
-                <label for="rewardCoin">Reward Coin:</label>
-                <InputNumber id="rewardCoin" @bind-Value="selectedEntry.Reward_coin" class="form-control" />
-            </div>
-            <div>
-                <label for="lessonType">Lesson Type:</label>
-                <InputText id="lessonType" @bind-Value="selectedEntry.Lesson_type" class="form-control" />
-            </div>
-            <div>
-                <label for="pathname">Pathname:</label>
-                <InputText id="pathname" @bind-Value="selectedEntry.Pathname" class="form-control" />
-            </div>
-            <div>
-                <label for="color">Color:</label>
-                <InputText id="color" @bind-Value="selectedEntry.Color" class="form-control" />
-            </div>
-            <div>
-                <label for="resourcesLink">Resources Link:</label>
-                <InputText id="resourcesLink" @bind-Value="selectedEntry.Resources_link" class="form-control" />
-            </div>
-            <div>
-                <label for="pdf">PDF:</label>
-                <InputFile id="pdf" OnChange="HandleFileSelected" class="form-control" />
-            </div>
-            <div>
-                <label for="tasks">Tasks:</label>
-                <InputText id="tasks" @bind-Value="selectedEntry.Tasks" class="form-control" />
-            </div>
-            <div>
-                <label for="level">Level:</label>
-                <InputText id="level" @bind-Value="selectedEntry.Level" class="form-control" />
-            </div>
-            <div>
-                <label for="date">Date:</label>
-                <InputDate id="date" @bind-Value="selectedEntry.Date" class="form-control" />
-            </div>
-            <button type="submit" class="btn btn-primary">Save</button>
-        </EditForm>
-    </div>
-}
-
 <style>
     .entry-button {
-        display: inline-block;
-        margin: 0;
-        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-start; /* Align items from the left */
+    }
+
+    .btn-secondary {
+        cursor: pointer;
+        padding: 20px 10px; /* Make boxes taller but thinner */
+        margin: 5px;
+        border-radius: 50px; /* Very rounded corners */
+        text-align: center;
+        width: 100px; /* Adjust width to make it thinner */
+        height: 360px; /* Adjust height to make it taller */
+        background-color: #D3D3D3;
     }
 </style>
 
@@ -190,7 +218,7 @@
             SubjectId = 0
         };
     private List<TextEntry> textEntries = new List<TextEntry>();
-    private TextEntry? selectedEntry;
+    private TextEntry? selectedEntry = new TextEntry();
     private bool isFormVisible = false;
     private bool isEditFormVisible = false;
 
@@ -215,7 +243,17 @@
     private void SelectEntry(TextEntry entry)
     {
         selectedEntry = entry;
+        StateHasChanged();
     }
+
+
+    private void CloseEditModal()
+    {
+        isEditFormVisible = false;
+        JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('editLessonModal')).hide()");
+    }
+
+
 
     [JSInvokable("DeselectEntry")]
     public static Task DeselectEntry()
@@ -236,7 +274,11 @@
     {
         selectedEntry = entry;
         isEditFormVisible = true;
+        JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('editLessonModal')).show()");
     }
+
+
+
 
     private async Task HandleValidSubmit()
     {
@@ -266,14 +308,17 @@
                 SubjectId = 0
             };
         isFormVisible = false;
-        JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('lessonModal')).hide()");
+        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('lessonModal')).hide()");
     }
 
     private async Task HandleEditSubmit()
     {
         await DbContext.SaveChangesAsync();
         isEditFormVisible = false;
+        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('editLessonModal')).hide()");
+        StateHasChanged();
     }
+
 
     private async Task ViewPDF(TextEntry entry)
     {
@@ -310,18 +355,11 @@
         }
     }
 
+
     public void Dispose()
     {
         OnDeselectEntry -= HandleDeselectEntry;
     }
 
     private static event Action? OnDeselectEntry;
-}
-
-.entry-button {
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    height: auto;
 }
