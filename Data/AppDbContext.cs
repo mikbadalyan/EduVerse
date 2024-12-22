@@ -15,10 +15,7 @@ namespace EduVerse.Data
         public DbSet<TextEntry> TextEntries { get; set; }
         public DbSet<User> Users => Set<User>();
         public DbSet<StudUser> StudUsers { get; set; }
-        public DbSet<AccountSettings> AccountSettings { get; set; }
-        public DbSet<LanguageAndTimeSettings> LanguageAndTimeSettings { get; set; }
-        public DbSet<NotificationSettings> NotificationSettings { get; set; }
-        public DbSet<PrivacyAndDataSettings> PrivacyAndDataSettings { get; set; }
+       
         public DbSet<RectangleStatus> RectangleStatuses { get; set; } // Add this line
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
