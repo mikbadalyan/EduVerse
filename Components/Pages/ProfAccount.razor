@@ -6,11 +6,33 @@
 @rendermode InteractiveServer
 @layout Components.Layout.ProfLayout
 
-<h3>Lesson Management</h3>
 
 <p>
     <button class="btn btn-primary" @onclick="ShowForm">Add a Lesson</button>
+    <button class="btn btn-primary" @onclick="ToggleFilters">Filter</button>
 </p>
+
+@if (areFiltersVisible)
+{
+    <div class="filters">
+        <div>
+            <label for="filterTopic">Filter by Topic:</label>
+            <InputText id="filterTopic" @bind-Value="filterTopic" class="form-control" />
+        </div>
+        <div>
+            <label for="filterLevel">Filter by Level:</label>
+            <InputText id="filterLevel" @bind-Value="filterLevel" class="form-control" />
+        </div>
+        <div>
+            <label for="filterDate">Filter by Date:</label>
+            <InputDate id="filterDate" @bind-Value="filterDate" class="form-control" />
+        </div>
+        <div>
+            <label for="filterPathname">Filter by Pathname:</label>
+            <InputText id="filterPathname" @bind-Value="filterPathname" class="form-control" />
+        </div>
+    </div>
+}
 
 <div class="modal fade" id="lessonModal" tabindex="-1" aria-labelledby="lessonModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -173,19 +195,24 @@
     </div>
 </div>
 
-
-@foreach (var entry in textEntries)
+@foreach (var group in FilteredEntries.GroupBy(entry => entry.Date.Date).OrderByDescending(g => g.Key))
 {
-    <div class="entry-button">
-        <button class="btn btn-secondary m-2" @onclick="() => SelectEntry(entry)">
-            @entry.Name - Lesson: @entry.Lesson - Type: @entry.Lesson_type
-        </button>
-        @if (selectedEntry == entry)
+    <h4>@group.Key.ToShortDateString()</h4>
+    <div class="entry-row">
+        @foreach (var entry in group)
         {
-            <div class="entry-actions">
-                <button class="btn btn-info m-1" @onclick="() => EditEntry(entry)">Edit</button>
-                <button class="btn btn-warning m-1" @onclick="() => ViewPDF(entry)">View PDF</button>
-                <button class="btn btn-danger m-1" @onclick="() => DeleteEntry(entry)">Delete</button>
+            <div class="entry-button">
+                <button class="btn btn-secondary m-2" @onclick="() => SelectEntry(entry)">
+                    @entry.Name - Lesson: @entry.Lesson - Type: @entry.Lesson_type
+                </button>
+                @if (selectedEntry == entry)
+                {
+                    <div class="entry-actions">
+                        <button class="btn btn-info m-1" @onclick="() => EditEntry(entry)">Edit</button>
+                        <button class="btn btn-warning m-1" @onclick="() => ViewPDF(entry)">View PDF</button>
+                        <button class="btn btn-danger m-1" @onclick="() => DeleteEntry(entry)">Delete</button>
+                    </div>
+                }
             </div>
         }
     </div>
@@ -193,10 +220,9 @@
 
 <style>
     .entry-button {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: flex-start; /* Align items from the left */
+        display: inline-block;
+        margin: 0;
+        padding: 0;
     }
 
     .btn-secondary {
@@ -208,6 +234,23 @@
         width: 100px; /* Adjust width to make it thinner */
         height: 360px; /* Adjust height to make it taller */
         background-color: #D3D3D3;
+        color: black;
+    }
+
+    .filters {
+        margin-bottom: 20px;
+    }
+
+    .filters div {
+        margin-bottom: 10px;
+    }
+
+    .entry-row {
+        margin-bottom: 20px;
+    }
+
+    body {
+        background-color: #1C375B;
     }
 </style>
 
@@ -217,10 +260,26 @@
         {
             SubjectId = 0
         };
+    private bool areFiltersVisible = false;
+
+    private void ToggleFilters()
+    {
+        areFiltersVisible = !areFiltersVisible;
+    }
+    private IEnumerable<TextEntry> FilteredEntries => textEntries
+        .Where(entry => string.IsNullOrEmpty(filterTopic) || entry.Topic.Contains(filterTopic, StringComparison.OrdinalIgnoreCase))
+        .Where(entry => string.IsNullOrEmpty(filterLevel) || entry.Level.Contains(filterLevel, StringComparison.OrdinalIgnoreCase))
+        .Where(entry => !filterDate.HasValue || entry.Date.Date == filterDate.Value.Date)
+        .Where(entry => string.IsNullOrEmpty(filterPathname) || entry.Pathname.Contains(filterPathname, StringComparison.OrdinalIgnoreCase));
     private List<TextEntry> textEntries = new List<TextEntry>();
     private TextEntry? selectedEntry = new TextEntry();
     private bool isFormVisible = false;
     private bool isEditFormVisible = false;
+
+    private string filterTopic = string.Empty;
+    private string filterLevel = string.Empty;
+    private DateTime? filterDate = null;
+    private string filterPathname = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -246,14 +305,11 @@
         StateHasChanged();
     }
 
-
     private void CloseEditModal()
     {
         isEditFormVisible = false;
         JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('editLessonModal')).hide()");
     }
-
-
 
     [JSInvokable("DeselectEntry")]
     public static Task DeselectEntry()
@@ -276,9 +332,6 @@
         isEditFormVisible = true;
         JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('editLessonModal')).show()");
     }
-
-
-
 
     private async Task HandleValidSubmit()
     {
@@ -319,7 +372,6 @@
         StateHasChanged();
     }
 
-
     private async Task ViewPDF(TextEntry entry)
     {
         if (entry.PDF != null)
@@ -354,7 +406,6 @@
             }
         }
     }
-
 
     public void Dispose()
     {
