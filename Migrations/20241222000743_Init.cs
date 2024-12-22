@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EduVerse.Migrations
 {
     /// <inheritdoc />
-    public partial class InititalCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,13 +30,16 @@ namespace EduVerse.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Coin = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SurName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -105,7 +108,10 @@ namespace EduVerse.Migrations
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SubjectId = table.Column<int>(type: "int", nullable: true)
+                    SubjectId = table.Column<int>(type: "int", nullable: true),
+                    PdfLink = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Resources = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Tasks = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,17 +119,70 @@ namespace EduVerse.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "RectangleStatuses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Value = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RectangleStatuses", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudUsers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Coin = table.Column<int>(type: "int", nullable: false)
+                    Coin = table.Column<int>(type: "int", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    University = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Age = table.Column<int>(type: "int", nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Surname = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GithubLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LinkedinLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FacebookLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    InstagramLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TelegramLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CvPdfLink = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    SoftSkills = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_StudUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TextEntries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Topic = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Lesson = table.Column<int>(type: "int", nullable: false),
+                    Reward_coin = table.Column<int>(type: "int", nullable: false),
+                    Lesson_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Pathname = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Resources_link = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PDF = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Tasks = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Level = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TextEntries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -300,7 +359,13 @@ namespace EduVerse.Migrations
                 name: "NewEntities");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "RectangleStatuses");
+
+            migrationBuilder.DropTable(
+                name: "StudUsers");
+
+            migrationBuilder.DropTable(
+                name: "TextEntries");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

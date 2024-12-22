@@ -1,5 +1,6 @@
 ﻿@page "/courses"
 @using EduVerse.Components.Layout
+@using EduVerse.Data
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @inherits LayoutComponentBase
@@ -54,9 +55,9 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .subject-box h3 {
-        margin-bottom: 10px;
-    }
+        .subject-box h3 {
+            margin-bottom: 10px;
+        }
 
     .see-more-button {
         background-color: green;
@@ -71,6 +72,63 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    .modal {
+        display: block;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        outline: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-dialog {
+        position: relative;
+        width: auto;
+        margin: 10px;
+        pointer-events: none;
+    }
+
+    .modal-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        pointer-events: auto;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 0.3rem;
+        outline: 0;
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        border-top-left-radius: 0.3rem;
+        border-top-right-radius: 0.3rem;
+    }
+
+    .modal-body {
+        position: relative;
+        flex: 1 1 auto;
+        padding: 1rem;
+    }
+
+    .modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
     }
 </style>
 
@@ -106,9 +164,70 @@
     </footer>
 </div>
 
+@if (showModal)
+{
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@selectedSubject</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Topics</h6>
+                    <ul>
+                        @foreach (var entry in selectedEntries)
+                        {
+                            <li>@entry.Topic</li>
+                        }
+                    </ul>
+                    <h6>Resources</h6>
+                    <ul>
+                        @foreach (var entry in selectedEntries)
+                        {
+                            @foreach (var resource in entry.Resources_link)
+                            {
+                                <li>@resource</li>
+                            }
+                        }
+                    </ul>
+                    <h6>Tasks</h6>
+                    <ul>
+                        @foreach (var entry in selectedEntries)
+                        {
+                            @foreach (var task in entry.Tasks)
+                            {
+                                <li>@task</li>
+                            }
+                        }
+                    </ul>
+                    <h6>Information</h6>
+                    <ul>
+                        @foreach (var entry in selectedEntries)
+                        {
+                            <li><strong>Name:</strong> @entry.Name</li>
+                            <li><strong>Lesson:</strong> @entry.Lesson</li>
+                            <li><strong>Coin:</strong> @entry.Reward_coin</li>
+                            <li><strong>Lesson Type:</strong> @entry.Lesson_type</li>
+                            <li><strong>Date:</strong> @entry.Date.ToShortDateString()</li>
+                         
+                        }
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private string userName = "Guest";
     private List<string> subjects = new List<string>();
+    private bool showModal = false;
+    private string selectedSubject = string.Empty;
+    private List<TextEntry> selectedEntries = new List<TextEntry>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -147,8 +266,17 @@
         }
     }
 
-    private void NavigateToSubject(string subject)
+    private async Task NavigateToSubject(string subject)
     {
-        // Implement navigation logic here
+        selectedSubject = subject;
+        selectedEntries = await DbContext.TextEntries
+            .Where(te => te.Name == subject)
+            .ToListAsync();
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
     }
 }

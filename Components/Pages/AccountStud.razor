@@ -90,6 +90,8 @@
             <option value="@subject">@subject</option>
         }
     </select>
+    <span>@currentUser?.Name @currentUser?.Surname</span>
+
 
     <label for="lessonNumberFilter">Filter by Lesson Number:</label>
     <input type="number" id="lessonNumberFilter" @oninput="OnLessonNumberFilterChanged" />
@@ -193,6 +195,7 @@
 }
 
 @code {
+    private StudUser? currentUser;
     private List<NewEntity> newEntities = new();
     private List<NewEntity> filteredEntities = new();
     private List<DateTime> dates = new()
@@ -239,6 +242,8 @@
             subjects = newEntities.Select(e => e.Name).Distinct().ToList();
             lessonTypes = newEntities.Select(e => e.LessonType).Distinct().ToList();
 
+            currentUser = await DbContext.StudUsers.FirstOrDefaultAsync(u => u.UserId == userId);
+
             var currentDate = DateTime.Now.Date;
             var currentBoxId = $"date-{currentDate:yyyyMMdd}";
             await JSRuntime.InvokeVoidAsync("scrollToElement", currentBoxId);
@@ -247,18 +252,20 @@
         }
     }
 
+
     private void FilterEntities()
     {
         filteredEntities = newEntities
             .Where(e => (string.IsNullOrEmpty(subjectFilter) || e.Name == subjectFilter) &&
                         (!lessonNumberFilter.HasValue || e.Lesson == lessonNumberFilter.Value) &&
-                        (string.IsNullOrEmpty(statusFilter) || e.Status == statusFilter) &&
+                        (string.IsNullOrEmpty(statusFilter) || e.Status == statusFilter || (statusFilter == "Not Done" && e.Status == "Unlocked")) &&
                         (!dateFilter.HasValue || e.Date.Date == dateFilter.Value.Date) &&
                         (string.IsNullOrEmpty(pathnameFilter) || e.PathName.Contains(pathnameFilter, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
         StateHasChanged();
     }
+
 
     private void OnSubjectFilterChanged(ChangeEventArgs e)
     {
@@ -371,7 +378,6 @@
         }
     }
 
-
     private async Task ViewPDF(NewEntity entity)
     {
         if (entity.PdfLink != null)
@@ -387,8 +393,12 @@
         var userExists = await DbContext.StudUsers.AnyAsync(u => u.UserId == userId);
         if (!userExists)
         {
+            // Prompt for user name and surname
+            var userName = await JSRuntime.InvokeAsync<string>("prompt", "Please enter your Name:");
+            var userSurname = await JSRuntime.InvokeAsync<string>("prompt", "Please enter your Surname:");
+
             // Register the new user
-            DbContext.StudUsers.Add(new StudUser { UserId = userId });
+            DbContext.StudUsers.Add(new StudUser { UserId = userId, Name = userName, Surname = userSurname });
 
             // Add text entries for the new user
             var textEntries = await DbContext.TextEntries.ToListAsync();
