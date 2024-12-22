@@ -1,0 +1,379 @@
+﻿@page "/settings"
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@inject AppDbContext DbContext
+@inject NavigationManager Navigation
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Settings</PageTitle>
+
+<h1>Settings</h1>
+
+<div class="d-flex" background="#1C375B">
+    <div class="settings-buttons d-flex flex-column" style="width: 15%;">
+        <button class="btn btn-primary mb-2" @onclick="ShowAccount">Account</button>
+        <button class="btn btn-primary mb-2" @onclick="ShowNotifications">Notifications</button>
+        <button class="btn btn-primary mb-2" @onclick="ShowLanguageAndTime">Language and Time</button>
+        <button class="btn btn-primary mb-2" @onclick="ShowPrivacyAndData">Privacy and Data</button>
+        <button class="btn btn-primary mb-2" @onclick="ShowSecurity">Security</button>
+    </div>
+    <div class="settings-content">
+        @if (selectedSetting == "Account")
+        {
+            <div class="d-flex flex-column" style="width: 400px; margin-left: 100px;">
+                <p>Account picture</p>
+                <img src="3276535.png" width="200" height="200" alt="AccountPicture" />
+                <p style="margin-top: 1rem; margin-bottom: 0">Bio</p>
+                <p>@(accountSettings?.Bio ?? "No bio available")</p>
+                <p style="margin-bottom: 0">Phone number</p>
+                <p>@(accountSettings?.PhoneNumber ?? "No phone number available")</p>
+                <p style="margin-bottom: 0">Email address</p>
+                <p>@(accountSettings?.EmailAddress ?? "No email address available")</p>
+                <p style="margin-bottom: 0">Educational institution</p>
+                <p>@(accountSettings?.EducationalInstitution ?? "No educational institution available")</p>
+                <p style="margin-bottom: 0">Country</p>
+                <p>@(accountSettings?.Country ?? "No country available")</p>
+                <p style="margin-bottom: 0">City/Town</p>
+                <p>@(accountSettings?.City ?? "No city available")</p>
+                <p style="margin-bottom: 0">Date of birth</p>
+                <p>@(accountSettings?.DateOfBirth.ToShortDateString() ?? "No date of birth available")</p>
+                <p style="margin-bottom: 0">Social links</p>
+                <p>@(accountSettings?.SocialLinks ?? "No social links available")</p>
+            </div>
+        }
+        else if (selectedSetting == "Notifications")
+        {
+            <EditForm Model="notificationSettings" OnValidSubmit="SaveNotificationSettings">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group" style="margin-left: 100px; margin-bottom: 10px;">
+                    <label for="receiveDeadlineWarnings">Receive Deadline Warnings</label>
+                    <InputCheckbox id="receiveDeadlineWarnings" @bind-Value="notificationSettings.ReceiveDeadlineWarnings" />
+                </div>
+                <div class="form-group" style="margin-left: 100px; margin-bottom: 10px;">
+                    <label for="receiveMessages">Receive Messages</label>
+                    <InputCheckbox id="receiveMessages" @bind-Value="notificationSettings.ReceiveMessages" />
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-left: 100px; margin-bottom: 10px;">Save</button>
+            </EditForm>
+        }
+        else if (selectedSetting == "LanguageAndTime")
+        {
+            <EditForm Model="languageAndTimeSettings" OnValidSubmit="SaveLanguageAndTimeSettings">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group" style="margin-left: 100px; margin-bottom: 10px;">
+                    <label for="language">Language</label>
+                    <InputSelect id="language" class="form-control" @bind-Value="languageAndTimeSettings.Language">
+                        <option value="">Select Language</option>
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                    </InputSelect>
+                </div>
+                <div class="form-group" style="margin-left: 100px; margin-bottom: 10px;">
+                    <label for="timeZone">Time Zone</label>
+                    <InputSelect id="timeZone" class="form-control" @bind-Value="languageAndTimeSettings.TimeZone">
+                        <option value="">Select Time Zone</option>
+                        <option value="UTC-12:00">UTC-12:00</option>
+                        <option value="UTC-11:00">UTC-11:00</option>
+                        <option value="UTC-10:00">UTC-10:00</option>
+                        <option value="UTC-09:00">UTC-09:00</option>
+                        <option value="UTC-08:00">UTC-08:00</option>
+                        <option value="UTC-07:00">UTC-07:00</option>
+                        <option value="UTC-06:00">UTC-06:00</option>
+                        <option value="UTC-05:00">UTC-05:00</option>
+                        <option value="UTC-04:00">UTC-04:00</option>
+                        <option value="UTC-03:00">UTC-03:00</option>
+                        <option value="UTC-02:00">UTC-02:00</option>
+                        <option value="UTC-01:00">UTC-01:00</option>
+                        <option value="UTC+00:00">UTC+00:00</option>
+                        <option value="UTC+01:00">UTC+01:00</option>
+                        <option value="UTC+02:00">UTC+02:00</option>
+                        <option value="UTC+03:00">UTC+03:00</option>
+                        <option value="UTC+04:00">UTC+04:00</option>
+                        <option value="UTC+05:00">UTC+05:00</option>
+                        <option value="UTC+06:00">UTC+06:00</option>
+                        <option value="UTC+07:00">UTC+07:00</option>
+                        <option value="UTC+08:00">UTC+08:00</option>
+                        <option value="UTC+09:00">UTC+09:00</option>
+                        <option value="UTC+10:00">UTC+10:00</option>
+                        <option value="UTC+11:00">UTC+11:00</option>
+                        <option value="UTC+12:00">UTC+12:00</option>
+                    </InputSelect>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-left: 100px; margin-bottom: 10px;">Save</button>
+            </EditForm>
+        }
+        else if (selectedSetting == "PrivacyAndData")
+        {
+            <EditForm Model="privacyAndDataSettings" OnValidSubmit="SavePrivacyAndDataSettings">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group" style="margin-left: 100px; margin-bottom: 10px;">
+                    <label for="privateAccount">Private Account</label>
+                    <InputCheckbox id="privateAccount" @bind-Value="privacyAndDataSettings.PrivateAccount" />
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-left: 100px; margin-bottom: 10px;">Save</button>
+            </EditForm>
+        }
+        else if (selectedSetting == "Security")
+        {
+            <p style="margin-left: 100px">COMING SOON...</p>
+        }
+    </div>
+    <div class="settings-edit">
+        @if (selectedSetting == "Account")
+        {
+            <div class="d-flex flex-column" style="width: 300px; margin-left: 50px;">
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("Bio", accountSettings?.Bio ?? "")' style="margin-top: 260px">Edit Bio</button>
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("Phone Number", accountSettings?.PhoneNumber ?? "")' style="margin-top: 19px">Edit Phone Number</button>
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("Email Address", accountSettings?.EmailAddress ?? "")' style="margin-top: 19px">Edit Email Address</button>
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("Educational Institution", accountSettings?.EducationalInstitution ?? "")' style="margin-top: 19px">Edit Educational Institution</button>
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("Country", accountSettings?.Country ?? "")' style="margin-top: 19px">Edit Country</button>
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("City", accountSettings?.City ?? "")' style="margin-top: 19px">Edit City</button>
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("Date of Birth", accountSettings?.DateOfBirth.ToShortDateString() ?? "")' style="margin-top: 19px">Edit Date of Birth</button>
+                <button class="btn btn-secondary mb-2" @onclick='() => ShowEditModal("Social Links", accountSettings?.SocialLinks ?? "")' style="margin-top: 19px">Edit Social Links</button>
+            </div>
+        }
+    </div>
+</div>
+
+<EditModal @ref="editModal" Title="@editTitle" EditValue="@editValue" OnSave="SaveEdit" />
+
+<div class="add-account-settings" style="width: 25%">
+    <h2>Add New Account Settings</h2>
+    <EditForm Model="newAccountSettings" OnValidSubmit="AddAccountSettings">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="bio">Bio</label>
+            <InputText id="bio" class="form-control" @bind-Value="newAccountSettings.Bio" />
+        </div>
+        <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <InputText id="phoneNumber" class="form-control" @bind-Value="newAccountSettings.PhoneNumber" />
+        </div>
+        <div class="form-group">
+            <label for="emailAddress">Email Address</label>
+            <InputText id="emailAddress" class="form-control" @bind-Value="newAccountSettings.EmailAddress" />
+        </div>
+        <div class="form-group">
+            <label for="educationalInstitution">Educational Institution</label>
+            <InputText id="educationalInstitution" class="form-control" @bind-Value="newAccountSettings.EducationalInstitution" />
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <InputText id="country" class="form-control" @bind-Value="newAccountSettings.Country" />
+        </div>
+        <div class="form-group">
+            <label for="city">City</label>
+            <InputText id="city" class="form-control" @bind-Value="newAccountSettings.City" />
+        </div>
+        <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <InputDate id="dateOfBirth" class="form-control" @bind-Value="newAccountSettings.DateOfBirth" />
+        </div>
+        <div class="form-group">
+            <label for="socialLinks">Social Links</label>
+            <InputText id="socialLinks" class="form-control" @bind-Value="newAccountSettings.SocialLinks" />
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </EditForm>
+</div>
+
+@code {
+    private string selectedSetting = string.Empty;
+    private AccountSettings? accountSettings;
+    private LanguageAndTimeSettings languageAndTimeSettings = new LanguageAndTimeSettings();
+    private NotificationSettings notificationSettings = new NotificationSettings();
+    private PrivacyAndDataSettings privacyAndDataSettings = new PrivacyAndDataSettings();
+    private EditModal? editModal;
+    private string editTitle = string.Empty;
+    private string editValue = string.Empty;
+    private AccountSettings newAccountSettings = new AccountSettings();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Console.WriteLine("Initializing component...");
+            accountSettings = await DbContext.AccountSettings.FirstOrDefaultAsync();
+            languageAndTimeSettings = await DbContext.LanguageAndTimeSettings.FirstOrDefaultAsync() ?? new LanguageAndTimeSettings();
+            notificationSettings = await DbContext.NotificationSettings.FirstOrDefaultAsync() ?? new NotificationSettings();
+            privacyAndDataSettings = await DbContext.PrivacyAndDataSettings.FirstOrDefaultAsync() ?? new PrivacyAndDataSettings();
+            if (accountSettings == null)
+            {
+                Console.WriteLine("No account settings found.");
+            }
+            else
+            {
+                Console.WriteLine("Account settings loaded successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+        }
+    }
+
+    private void ShowAccount()
+    {
+        selectedSetting = "Account";
+    }
+
+    private void ShowNotifications()
+    {
+        selectedSetting = "Notifications";
+    }
+
+    private void ShowLanguageAndTime()
+    {
+        selectedSetting = "LanguageAndTime";
+    }
+
+    private void ShowPrivacyAndData()
+    {
+        selectedSetting = "PrivacyAndData";
+    }
+
+    private void ShowSecurity()
+    {
+        selectedSetting = "Security";
+    }
+
+    private void ShowEditModal(string title, string value)
+    {
+        editTitle = title;
+        editValue = value;
+        editModal?.ShowModal();
+    }
+
+    private async Task SaveEdit(string newValue)
+    {
+        if (accountSettings == null) return;
+
+        switch (editTitle)
+        {
+            case "Bio":
+                accountSettings.Bio = newValue;
+                break;
+            case "Phone Number":
+                accountSettings.PhoneNumber = newValue;
+                break;
+            case "Email Address":
+                accountSettings.EmailAddress = newValue;
+                break;
+            case "Educational Institution":
+                accountSettings.EducationalInstitution = newValue;
+                break;
+            case "Country":
+                accountSettings.Country = newValue;
+                break;
+            case "City":
+                accountSettings.City = newValue;
+                break;
+            case "Date of Birth":
+                accountSettings.DateOfBirth = DateTime.Parse(newValue);
+                break;
+            case "Social Links":
+                accountSettings.SocialLinks = newValue;
+                break;
+        }
+
+        DbContext.AccountSettings.Update(accountSettings);
+        await DbContext.SaveChangesAsync();
+        Console.WriteLine("Changes saved to the database.");
+        StateHasChanged();
+    }
+
+    private async Task AddAccountSettings()
+    {
+        try
+        {
+            DbContext.AccountSettings.Add(newAccountSettings);
+            await DbContext.SaveChangesAsync();
+            Console.WriteLine("New account settings added to the database.");
+            newAccountSettings = new AccountSettings();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while adding account settings: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+        }
+    }
+
+    private async Task SaveLanguageAndTimeSettings()
+    {
+        try
+        {
+            if (languageAndTimeSettings.Id == 0)
+            {
+                DbContext.LanguageAndTimeSettings.Add(languageAndTimeSettings);
+            }
+            else
+            {
+                DbContext.LanguageAndTimeSettings.Update(languageAndTimeSettings);
+            }
+            await DbContext.SaveChangesAsync();
+            Console.WriteLine("Language and time settings saved to the database.");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while saving language and time settings: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+        }
+    }
+
+    private async Task SaveNotificationSettings()
+    {
+        try
+
+        {
+            if (notificationSettings.Id == 0)
+            {
+                DbContext.NotificationSettings.Add(notificationSettings);
+            }
+            else
+            {
+                DbContext.NotificationSettings.Update(notificationSettings);
+            }
+            await DbContext.SaveChangesAsync();
+            Console.WriteLine("Notification settings saved to the database.");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while saving notification settings: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+        }
+    }
+
+    private async Task SavePrivacyAndDataSettings()
+    {
+        try
+
+        {
+            if (privacyAndDataSettings.Id == 0)
+            {
+                DbContext.PrivacyAndDataSettings.Add(privacyAndDataSettings);
+            }
+            else
+            {
+                DbContext.PrivacyAndDataSettings.Update(privacyAndDataSettings);
+            }
+            await DbContext.SaveChangesAsync();
+            Console.WriteLine("Privacy and data settings saved to the database.");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while saving privacy and data settings: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+        }
+    }
+}
