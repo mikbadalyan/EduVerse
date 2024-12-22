@@ -74,35 +74,35 @@
         flex-wrap: wrap;
         justify-content: center;
     }
-
-    .contribution-table {
+.contribution-table {
         display: grid;
-        grid-template-columns: repeat(52, 1fr);
+        grid-template-rows: repeat(7, 1fr); /* 7 days in a week */
+        grid-template-columns: repeat(52, 1fr); /* 52 weeks in a year */
         gap: 2px;
         margin: 20px 0;
     }
 
     .contribution-cell {
-        width: 20px;
-        height: 20px;
+        width: 20px; /* Larger width */
+        height: 20px; /* Larger height */
         background-color: #ebedf0;
     }
 
-        .contribution-cell.level-1 {
-            background-color: #c6e48b;
-        }
+    .contribution-cell.level-1 {
+        background-color: #c6e48b;
+    }
 
-        .contribution-cell.level-2 {
-            background-color: #7bc96f;
-        }
+    .contribution-cell.level-2 {
+        background-color: #7bc96f;
+    }
 
-        .contribution-cell.level-3 {
-            background-color: #239a3b;
-        }
+    .contribution-cell.level-3 {
+        background-color: #239a3b;
+    }
 
-        .contribution-cell.level-4 {
-            background-color: #196127;
-        }
+    .contribution-cell.level-4 {
+        background-color: #196127;
+    }
 
     .months {
         display: flex;
@@ -136,10 +136,10 @@
         <div class="subject-boxes">
             @foreach (var pathway in pathways)
             {
-                <div class="subject-box">
-                    <h3>@pathway</h3>
-                    <button class="see-more-button" @onclick="() => NavigateToDashboard()">Go to Dashboard</button>
-                </div>
+                    <div class="subject-box">
+                        <h3>@pathway</h3>
+                        <button class="see-more-button" @onclick="() => NavigateToDashboard()">Go to Dashboard</button>
+                    </div>
             }
         </div>
         <div class="months">
@@ -157,14 +157,17 @@
             <div class="month">Dec</div>
         </div>
         <div class="contribution-table">
-            @foreach (var week in contributionData)
-            {
-                @foreach (var day in week)
-                {
-                    <div class="contribution-cell @GetLevelClass(day.Value)" title="@day.Date.ToShortDateString() - @day.Value"></div>
-                }
-            }
-        </div>
+    @for (int day = 0; day < 7; day++) // Iterate by days in a week
+    {
+        @for (int week = 0; week < contributionData.Count; week++) // Iterate by weeks
+        {
+            var status = contributionData[week][day];
+            <div class="contribution-cell @GetLevelClass(status.Value)" title="@status.Date.ToShortDateString() - @status.Value"></div>
+        }
+    }
+</div>
+
+
         @Body
     </main>
     <footer>
@@ -222,28 +225,29 @@
         // Implement navigation logic to the dashboard here
     }
 
-    private async Task LoadContributionData()
+   private async Task LoadContributionData()
+{
+    var data = await DbContext.RectangleStatuses
+        .OrderBy(rs => rs.Date)
+        .ToListAsync();
+
+    var startDate = new DateTime(2024, 1, 1);
+    var endDate = new DateTime(2024, 12, 31);
+    var totalDays = (endDate - startDate).Days + 1;
+
+    // Initialize contributionData with 52 lists (one for each week)
+    contributionData = Enumerable.Range(0, 52).Select(_ => new List<RectangleStatus>()).ToList();
+
+    for (int i = 0; i < totalDays; i++)
     {
-        var data = await DbContext.RectangleStatuses
-            .OrderBy(rs => rs.Date)
-            .ToListAsync();
-
-        var startDate = new DateTime(2024, 1, 1);
-        var endDate = new DateTime(2024, 12, 31);
-        var totalDays = (endDate - startDate).Days + 1;
-
-        for (int i = 0; i < totalDays; i += 7) // 7 days a week
-        {
-            var week = new List<RectangleStatus>();
-            for (int j = 0; j < 7; j++)
-            {
-                var date = startDate.AddDays(i + j);
-                var status = data.FirstOrDefault(rs => rs.Date.Date == date.Date) ?? new RectangleStatus { Date = date, Value = 0 };
-                week.Add(status);
-            }
-            contributionData.Add(week);
-        }
+        var date = startDate.AddDays(i);
+        var status = data.FirstOrDefault(rs => rs.Date.Date == date.Date) ?? new RectangleStatus { Date = date, Value = 0 };
+        contributionData[i / 7].Add(status); // Add the status to the appropriate week list
     }
+}
+
+
+
 
     private string GetLevelClass(int value)
     {
