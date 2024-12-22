@@ -1,0 +1,60 @@
+﻿@inherits LayoutComponentBase
+@inject EduVerse.Data.AppDbContext DbContext
+
+@inject ILogger<AccountLayout> Logger
+
+<style>
+    header, footer {
+        background-color: #1C375B;
+        color: white;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .nav-links {
+        display: flex;
+        justify-content: center;
+        flex-grow: 1;
+    }
+
+        .nav-links a {
+            margin: 0 15px;
+            color: white;
+            text-decoration: none;
+        }
+
+    .account-info {
+        display: flex;
+        align-items: center;
+    }
+
+        .account-info img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+</style>
+
+<div class="account-layout">
+    <header>
+        <img src="logo.png" alt="Logo" style="height: 40px;">
+        <nav class="nav-links">
+            <a href="/home">Home</a>
+            <a href="/acc">Dashboard</a>
+            <a href="/courses">Courses</a>
+            <a href="/pathways">Pathways</a>
+            <a href="/progress">Progress Tracker</a>
+        </nav>
+        <div class="account-info">
+            <img src="avatar.jpg" alt="Account Image" style="height: 40px;">
+
+        </div>
+    </header>
+    <main>
+        @Body
+    </main>
+    <footer>
+        <!-- Footer content -->
+    </footer>
+</div>

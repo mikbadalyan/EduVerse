@@ -4,6 +4,7 @@
 @inject AppDbContext DbContext
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
+@layout Components.Layout.ProfLayout
 
 <h3>Lesson Management</h3>
 
@@ -192,9 +193,21 @@
 
 <style>
     .entry-button {
-        display: inline-block;
-        margin: 0;
-        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-start; /* Align items from the left */
+    }
+
+    .btn-secondary {
+        cursor: pointer;
+        padding: 20px 10px; /* Make boxes taller but thinner */
+        margin: 5px;
+        border-radius: 50px; /* Very rounded corners */
+        text-align: center;
+        width: 100px; /* Adjust width to make it thinner */
+        height: 360px; /* Adjust height to make it taller */
+        background-color: #D3D3D3;
     }
 </style>
 
