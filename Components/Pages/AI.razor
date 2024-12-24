@@ -1,0 +1,74 @@
+﻿@page "/ai"
+@inject EduVerse.AIService AIService // Inject the AIService
+@using System.Threading.Tasks
+@rendermode InteractiveServer
+
+
+
+<h3>AI Assistant</h3>
+
+<div class="form-group">
+    <label for="userMessage">Enter your message:</label>
+    <textarea id="userMessage" class="form-control" @bind="UserMessage" rows="4"></textarea>
+</div>
+
+<div class="mt-3">
+    <button class="btn btn-primary" @onclick="GetAIResponseAsync">Send</button>
+</div>
+
+@if (!string.IsNullOrEmpty(AIResponse))
+{
+    <div class="mt-4 p-3 bg-light rounded">
+        <h5>AI Response:</h5>
+        <p>@AIResponse</p>
+    </div>
+}
+
+@if (IsLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="mt-4 alert alert-danger">
+        <strong>Error:</strong> @ErrorMessage
+    </div>
+}
+
+@code {
+    private string UserMessage { get; set; } = string.Empty;
+    private string AIResponse { get; set; } = string.Empty;
+    private string ErrorMessage { get; set; } = string.Empty;
+    private bool IsLoading { get; set; } = false;
+
+    private async Task GetAIResponseAsync()
+    {
+        try
+        {
+            IsLoading = true; 
+            ErrorMessage = string.Empty; 
+            AIResponse = string.Empty; 
+
+            if (string.IsNullOrWhiteSpace(UserMessage))
+            {
+                ErrorMessage = "Please enter a message to send to the AI.";
+                return;
+            }
+
+
+            AIResponse = await AIService.GetAIResponseAsync(UserMessage);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while communicating with the AI.";
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false; 
+        }
+    }
+}

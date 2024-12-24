@@ -3,6 +3,8 @@ using EduVerse.Data;
 using Microsoft.EntityFrameworkCore;
 using EduVerse.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Web;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +35,8 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddScoped<UserManager<User>>(); 
 builder.Services.AddScoped<SignInManager<User>>();
 builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<EduVerse.AIService>();
+
 
 var app = builder.Build();
 
